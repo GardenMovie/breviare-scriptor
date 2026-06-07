@@ -4,7 +4,7 @@
 
 ---
 
-Brevia isn't live yet. I haven't written a single line of production code. But I've learned more from designing it than I expected to.
+Breviare isn't live yet. I haven't written a single line of production code. But I've learned more from designing it than I expected to.
 
 A few things that stuck with me:
 

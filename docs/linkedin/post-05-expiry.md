@@ -8,7 +8,7 @@ Should short links expire? If yes, when?
 
 My first instinct was: never expire them. Simple. But then I thought about what "never" actually means — a database slowly filling with links no one has clicked in five years, pointing to pages that no longer exist.
 
-So I designed expiry. Here's how it works in Brevia:
+So I designed expiry. Here's how it works in Breviare:
 
 By default, a link expires after **30 days of no clicks**. Not 30 days from creation — 30 days of inactivity. If someone uses it regularly, it stays alive. That felt more honest to how links actually get used.
 

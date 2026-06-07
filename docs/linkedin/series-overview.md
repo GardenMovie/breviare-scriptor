@@ -1,6 +1,6 @@
-# LinkedIn Series: Building Brevia
+# LinkedIn Series: Building Breviare
 
-**Series title:** Building Brevia — a URL shortener from scratch
+**Series title:** Building Breviare — a URL shortener from scratch
 
 **Audience:** Non-technical or lightly technical connections. Hiring managers, early-career folks, curious people.
 

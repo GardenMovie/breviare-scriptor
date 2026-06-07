@@ -194,7 +194,7 @@ Returns paginated list of links owned by the authenticated user.
     {
       "code": "aBcDeF",
       "display_code": "aBc-DeF",
-      "short_url": "https://brevia.sh/aBc-DeF",
+      "short_url": "https://breviare.sh/aBc-DeF",
       "destination": "https://example.com",
       "click_count": 42,
       "is_expired": false,

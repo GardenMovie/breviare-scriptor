@@ -1,6 +1,6 @@
 # Deployment — Database (PostgreSQL)
 
-Brevia uses PostgreSQL. The host is not yet decided; see [adr/0003-database-host.md](../adr/0003-database-host.md). This document covers the setup that applies regardless of host, with host-specific notes at the end.
+Breviare uses PostgreSQL. The host is not yet decided; see [adr/0003-database-host.md](../adr/0003-database-host.md). This document covers the setup that applies regardless of host, with host-specific notes at the end.
 
 ---
 
@@ -92,7 +92,7 @@ At minimum, set up a scheduled `pg_dump` to an external storage bucket (e.g. S3 
 
 - Use the connection pooler URL (port 6543) for application connections; use the direct URL (port 5432) for migrations only.
 - The `citext` extension is available by default.
-- Do not use Supabase's built-in auth or REST API (PostgREST) — Brevia has its own auth implementation.
+- Do not use Supabase's built-in auth or REST API (PostgREST) — Breviare has its own auth implementation.
 
 ### Railway Postgres
 

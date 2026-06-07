@@ -30,7 +30,7 @@ Base52 uses only letters, excluding all digits. 52^6 = ~19.7 billion combination
 - **Pro:** No ambiguous characters — every character in the alphabet is visually distinct from every other
 - **Pro:** All-letter codes read more naturally and are easier to spell aloud
 - **Pro:** 19.7 billion is an ample key space; at 10 million links created per day it would take over 5 years to exhaust
-- **Con:** Smaller key space than Base62; if Brevia grows to extreme scale, code length must eventually increase from 6 to 7 characters
+- **Con:** Smaller key space than Base62; if Breviare grows to extreme scale, code length must eventually increase from 6 to 7 characters
 - **Con:** Case-sensitive — `ABcDef` and `abcdef` are different codes. URLs are technically case-sensitive in the path component, so this is correct behavior, but users must be careful when hand-transcribing
 
 ### Option C — Base36 (a-z, 0-9, lowercase only), 7 characters
@@ -56,7 +56,7 @@ The combination of no-ambiguous-characters and a clean all-letter appearance mak
 
 ## Consequences
 
-- Short URLs are case-sensitive in the path: `brevia.sh/aBc-DeF` and `brevia.sh/abc-def` are different links. The backend must preserve case in lookups.
+- Short URLs are case-sensitive in the path: `breviare.sh/aBc-DeF` and `breviare.sh/abc-def` are different links. The backend must preserve case in lookups.
 - The display dash must be stripped before any database lookup; the database stores the 6-character code without the dash.
-- Vanity links (`brevia.sh/<username>`) use the username as the path segment directly and are not subject to the Base52 encoding scheme. See [features/vanity-links.md](../features/vanity-links.md).
+- Vanity links (`breviare.sh/<username>`) use the username as the path segment directly and are not subject to the Base52 encoding scheme. See [features/vanity-links.md](../features/vanity-links.md).
 - If the key space becomes a concern in the future, the code length can be increased from 6 to 7 characters (52^7 ≈ 1 trillion combinations) without changing the alphabet or display format convention.

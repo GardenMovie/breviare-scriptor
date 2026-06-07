@@ -4,7 +4,7 @@
 
 ---
 
-Every URL shortener has the same core question: how do you turn a long URL into something like `brevia.sh/abc123`?
+Every URL shortener has the same core question: how do you turn a long URL into something like `breviare.sh/abc123`?
 
 That `abc123` part is called a short code. Picking how to generate it took longer than I expected.
 

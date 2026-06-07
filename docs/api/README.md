@@ -1,13 +1,13 @@
 # API Reference
 
-The Brevia REST API is served by the backend (Railway) and versioned under `/api/v1/`.
+The Breviare REST API is served by the backend (Railway) and versioned under `/api/v1/`.
 
 ---
 
 ## Base URL
 
 ```
-https://api.brevia.sh/api/v1
+https://api.breviare.sh/api/v1
 ```
 
 (The exact domain is TBD and will be confirmed in [deployment/overview.md](../deployment/overview.md).)

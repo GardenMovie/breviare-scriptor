@@ -1,6 +1,6 @@
 # Database Schema
 
-Brevia uses a single PostgreSQL database. This document is the canonical reference for every table, column, constraint, and index.
+Breviare uses a single PostgreSQL database. This document is the canonical reference for every table, column, constraint, and index.
 
 For the encoding rationale behind short codes, see [adr/0005-encoding-scheme.md](../adr/0005-encoding-scheme.md).
 
@@ -20,7 +20,7 @@ Stores registered accounts.
 | `username` | `citext` | NOT NULL, UNIQUE | Case-insensitive text; see username rules in [features/user-accounts.md](../features/user-accounts.md) |
 | `username_changed_at` | `timestamptz` | NULLABLE | Timestamp of most recent username change; NULL if never changed |
 | `username_change_count_this_month` | `integer` | NOT NULL, default 0 | Resets at the start of each calendar month |
-| `vanity_destination` | `text` | NULLABLE | The URL that `brevia.sh/<username>` currently redirects to; NULL if not set |
+| `vanity_destination` | `text` | NULLABLE | The URL that `breviare.sh/<username>` currently redirects to; NULL if not set |
 | `vanity_destination_change_count_this_month` | `integer` | NOT NULL, default 0 | Resets at the start of each calendar month; max 5 |
 | `vanity_destination_changed_at` | `timestamptz` | NULLABLE | Timestamp of most recent vanity destination change |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | |

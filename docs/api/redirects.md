@@ -1,8 +1,8 @@
 # API — Redirects
 
-The redirect endpoint is the core of Brevia. It resolves a path slug to a destination URL and issues an HTTP redirect.
+The redirect endpoint is the core of Breviare. It resolves a path slug to a destination URL and issues an HTTP redirect.
 
-This is not a traditional REST endpoint — it does not serve JSON and does not require authentication. It is the public-facing route that end users hit when they click a Brevia link.
+This is not a traditional REST endpoint — it does not serve JSON and does not require authentication. It is the public-facing route that end users hit when they click a Breviare link.
 
 See [adr/0004-redirect-strategy.md](../adr/0004-redirect-strategy.md) for the rationale behind using 302.
 
@@ -83,7 +83,7 @@ All redirect responses include:
 Cache-Control: no-store
 ```
 
-This prevents browsers, CDNs, and intermediate proxies from caching the redirect. Every visit to a Brevia link must reach the backend so that analytics can be recorded and expiry can be evaluated. See [adr/0004-redirect-strategy.md](../adr/0004-redirect-strategy.md).
+This prevents browsers, CDNs, and intermediate proxies from caching the redirect. Every visit to a Breviare link must reach the backend so that analytics can be recorded and expiry can be evaluated. See [adr/0004-redirect-strategy.md](../adr/0004-redirect-strategy.md).
 
 ---
 

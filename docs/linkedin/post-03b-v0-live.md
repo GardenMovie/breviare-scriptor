@@ -6,7 +6,7 @@
 
 ---
 
-Brevia v0 is live.
+Breviare v0 is live.
 
 No accounts, no dashboard, no analytics. You paste a URL, you get a short link, you click it and it redirects. That's it.
 

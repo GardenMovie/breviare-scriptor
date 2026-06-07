@@ -1,6 +1,6 @@
 # Vanity Links
 
-Every registered user gets a personal vanity link: `brevia.sh/<username>`. When someone visits this URL, they are redirected to whatever destination the user has configured.
+Every registered user gets a personal vanity link: `breviare.sh/<username>`. When someone visits this URL, they are redirected to whatever destination the user has configured.
 
 Vanity links are distinct from regular short links — they are tied to an account, use the username as the path segment, and are never subject to expiry.
 
@@ -8,7 +8,7 @@ Vanity links are distinct from regular short links — they are tied to an accou
 
 ## What a Vanity Link Is
 
-- **Path:** `brevia.sh/<username>` — the username is the path segment, exactly as registered (though matched case-insensitively)
+- **Path:** `breviare.sh/<username>` — the username is the path segment, exactly as registered (though matched case-insensitively)
 - **Destination:** A URL configured by the account owner; this is stored in `users.vanity_destination`
 - **Redirect:** `302 Found` with `Cache-Control: no-store`, identical to regular short links
 - **Permanence:** The path persists as long as the account exists; it cannot be deleted independently of the account
@@ -37,8 +37,8 @@ This limit applies to destination changes only. The username (which also affects
 
 Changing a username changes the vanity link path. This is covered in full in [features/user-accounts.md](./user-accounts.md), but the key implications for vanity links are:
 
-- **Old path invalidated immediately:** `brevia.sh/<old_username>` returns `404` after a username change.
-- **New path active immediately:** `brevia.sh/<new_username>` resolves to the same `vanity_destination` as before.
+- **Old path invalidated immediately:** `breviare.sh/<old_username>` returns `404` after a username change.
+- **New path active immediately:** `breviare.sh/<new_username>` resolves to the same `vanity_destination` as before.
 - **No redirect from old to new:** There is no automatic redirect from the old path to the new path. External links to the old vanity URL will break.
 - **Destination is preserved:** The `vanity_destination` value carries over to the new username; the user does not need to re-set it.
 
@@ -66,7 +66,7 @@ If this shadowing behavior becomes a problem at scale, a stricter namespace part
 
 | Property | Regular Short Link | Vanity Link |
 |---|---|---|
-| Path | `brevia.sh/aBc-DeF` (generated) | `brevia.sh/<username>` (fixed by username) |
+| Path | `breviare.sh/aBc-DeF` (generated) | `breviare.sh/<username>` (fixed by username) |
 | Destination | Set at creation; updateable | Set by user; updateable up to 5x/month |
 | Expiry | After inactivity or absolute TTL | Never (while account exists) |
 | Analytics | Yes (for authenticated owners) | Not in v1 |
@@ -80,5 +80,5 @@ If this shadowing behavior becomes a problem at scale, a stricter namespace part
 
 When a user deletes their account:
 - `users.vanity_destination` is removed with the user row.
-- `brevia.sh/<username>` immediately returns `404`.
+- `breviare.sh/<username>` immediately returns `404`.
 - The username is freed and can be registered by a new user, who would then own that vanity path.

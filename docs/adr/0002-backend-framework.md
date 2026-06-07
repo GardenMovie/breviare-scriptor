@@ -6,7 +6,7 @@
 
 ## Context
 
-Brevia's backend handles link creation, redirect resolution, analytics recording, user authentication, and vanity link management. It will be deployed as a containerized service on Railway. The backend's performance-critical path is redirect resolution — a lookup + 302 response that fires on every click. Everything else (link creation, analytics queries, account management) is relatively low-frequency.
+Breviare's backend handles link creation, redirect resolution, analytics recording, user authentication, and vanity link management. It will be deployed as a containerized service on Railway. The backend's performance-critical path is redirect resolution — a lookup + 302 response that fires on every click. Everything else (link creation, analytics queries, account management) is relatively low-frequency.
 
 ## Options Considered
 

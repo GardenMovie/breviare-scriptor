@@ -21,8 +21,8 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(new ApiResponse.ApiError("VALIDATION_ERROR", "Request validation failed", fields)));
     }
 
-    @ExceptionHandler(BreviaException.class)
-    public ResponseEntity<ApiResponse<?>> handleBrevia(BreviaException ex) {
+    @ExceptionHandler(BreviareException.class)
+    public ResponseEntity<ApiResponse<?>> handleBreviare(BreviareException ex) {
         return ResponseEntity.status(ex.getStatus())
                 .body(ApiResponse.error(new ApiResponse.ApiError(ex.getCode(), ex.getMessage())));
     }

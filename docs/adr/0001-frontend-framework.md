@@ -5,7 +5,7 @@
 
 ## Context
 
-Brevia needs a frontend that handles link creation, user authentication, account dashboards, and analytics views. The frontend will be deployed to Vercel. Two options are under consideration: Next.js and Vite (React).
+Breviare needs a frontend that handles link creation, user authentication, account dashboards, and analytics views. The frontend will be deployed to Vercel. Two options are under consideration: Next.js and Vite (React).
 
 The core question is whether server-side rendering provides meaningful value for this application's use cases, or whether a pure client-side app is simpler and sufficient.
 

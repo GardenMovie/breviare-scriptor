@@ -29,7 +29,7 @@ Creates a new short link. Authentication is optional; if a valid Bearer token is
   "data": {
     "code": "aBcDeF",
     "display_code": "aBc-DeF",
-    "short_url": "https://brevia.sh/aBc-DeF",
+    "short_url": "https://breviare.sh/aBc-DeF",
     "destination": "https://example.com/some/long/url",
     "owner_id": "uuid-or-null",
     "created_at": "2026-06-04T12:00:00Z",
@@ -67,7 +67,7 @@ Same shape as the creation response, plus:
   "data": {
     "code": "aBcDeF",
     "display_code": "aBc-DeF",
-    "short_url": "https://brevia.sh/aBc-DeF",
+    "short_url": "https://breviare.sh/aBc-DeF",
     "destination": "https://example.com/some/long/url",
     "owner_id": "uuid-or-null",
     "created_at": "2026-06-04T12:00:00Z",

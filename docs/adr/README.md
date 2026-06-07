@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-This directory contains ADRs (Architecture Decision Records) for Brevia. Each ADR documents a significant technical or architectural decision: the context that prompted it, the options considered, and the chosen outcome.
+This directory contains ADRs (Architecture Decision Records) for Breviare. Each ADR documents a significant technical or architectural decision: the context that prompted it, the options considered, and the chosen outcome.
 
 ## Status Values
 

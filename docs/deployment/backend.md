@@ -1,6 +1,6 @@
 # Deployment — Backend (Railway)
 
-The Brevia backend is a Spring Boot (Java 21) application deployed as a containerized service on Railway. The framework decision is recorded in [adr/0002-backend-framework.md](../adr/0002-backend-framework.md).
+The Breviare backend is a Spring Boot (Java 21) application deployed as a containerized service on Railway. The framework decision is recorded in [adr/0002-backend-framework.md](../adr/0002-backend-framework.md).
 
 ---
 
@@ -18,7 +18,7 @@ The project uses **Gradle** (Kotlin DSL).
 ./gradlew bootJar
 ```
 
-This produces a single executable JAR at `build/libs/brevia.jar`.
+This produces a single executable JAR at `build/libs/breviare.jar`.
 
 ---
 
@@ -29,13 +29,13 @@ This produces a single executable JAR at `build/libs/brevia.jar`.
 ```dockerfile
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY build/libs/brevia.jar app.jar
+COPY build/libs/breviare.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 **Build command:** `./gradlew bootJar`
 
-**Start command:** `java -jar build/libs/brevia.jar` (or handled by the Dockerfile `ENTRYPOINT`)
+**Start command:** `java -jar build/libs/breviare.jar` (or handled by the Dockerfile `ENTRYPOINT`)
 
 **Port:** Railway injects a `PORT` environment variable. Configure Spring Boot to use it:
 

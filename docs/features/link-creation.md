@@ -1,6 +1,6 @@
 # Link Creation
 
-Creating a short link is the core action in Brevia. Both anonymous users and authenticated users can create links; the difference lies in ownership, analytics, and expiry options.
+Creating a short link is the core action in Breviare. Both anonymous users and authenticated users can create links; the difference lies in ownership, analytics, and expiry options.
 
 ---
 
@@ -10,7 +10,7 @@ Before a short code is generated, the destination URL is validated:
 
 - Scheme must be `http` or `https`. Other schemes (`ftp://`, `javascript:`, etc.) are rejected.
 - The URL must parse as a valid absolute URL (host is required).
-- The host must not be a Brevia domain (e.g. `brevia.sh`) — self-referential redirects are rejected to prevent loops.
+- The host must not be a Breviare domain (e.g. `breviare.sh`) — self-referential redirects are rejected to prevent loops.
 - Maximum destination URL length: 2048 characters.
 
 The backend does **not** perform DNS resolution or HTTP reachability checks at creation time. A link to a non-existent or offline host is created and will simply fail to load for the end user.
@@ -88,6 +88,6 @@ See [features/link-expiry.md](./link-expiry.md) for the full expiry specificatio
 
 ## Response
 
-A successful creation returns the short code, the full short URL, and expiry metadata. The short URL is formatted with the display dash (e.g. `https://brevia.sh/aBc-DeF`). The stored code (without the dash) is also included for use in subsequent API calls.
+A successful creation returns the short code, the full short URL, and expiry metadata. The short URL is formatted with the display dash (e.g. `https://breviare.sh/aBc-DeF`). The stored code (without the dash) is also included for use in subsequent API calls.
 
 See [api/links.md](../api/links.md) for the full response schema.

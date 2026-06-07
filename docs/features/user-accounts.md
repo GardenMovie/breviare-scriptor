@@ -1,6 +1,6 @@
 # User Accounts
 
-Brevia supports optional user registration. An account is not required to create a short link, but it unlocks analytics, link management, and a personal vanity link.
+Breviare supports optional user registration. An account is not required to create a short link, but it unlocks analytics, link management, and a personal vanity link.
 
 ---
 
@@ -22,7 +22,7 @@ Users register with an email address and password.
 
 ## Username Rules
 
-Usernames form the path segment for the user's vanity link (`brevia.sh/<username>`), so they must be URL-safe and visually unambiguous.
+Usernames form the path segment for the user's vanity link (`breviare.sh/<username>`), so they must be URL-safe and visually unambiguous.
 
 **Allowed characters:** `a-z`, `A-Z`, `0-9`, `-`, `_`
 
@@ -47,8 +47,8 @@ Users may change their username **once per calendar month**.
 - Attempting a second change in the same calendar month returns `429 Too Many Requests` with a message indicating when the limit resets.
 
 **Effect of a username change:**
-- The old vanity path (`brevia.sh/<old_username>`) immediately stops resolving. It returns `404 Not Found`.
-- The new vanity path (`brevia.sh/<new_username>`) activates immediately.
+- The old vanity path (`breviare.sh/<old_username>`) immediately stops resolving. It returns `404 Not Found`.
+- The new vanity path (`breviare.sh/<new_username>`) activates immediately.
 - Short links owned by the user are unaffected — they resolve by short code, not by username.
 - Any external sites or bookmarks pointing to the old vanity URL will break. The user is warned about this in the UI before confirming the change.
 
@@ -73,7 +73,7 @@ Access tokens are short-lived (e.g. 15 minutes). Refresh tokens are longer-lived
 - The `users` row is deleted.
 - Short links owned by the user have `owner_id` set to NULL (via `ON DELETE SET NULL` on the foreign key). The links continue to exist as anonymous links and remain subject to normal expiry rules.
 - `analytics_events` rows are retained (they are linked to `links`, not directly to `users`). Once the link itself is eventually expired and cleaned up, the events are cascade-deleted.
-- The vanity path (`brevia.sh/<username>`) immediately stops resolving.
+- The vanity path (`breviare.sh/<username>`) immediately stops resolving.
 - The username is freed and can be registered by another user.
 
 A soft-delete option (deactivate rather than delete) is out of scope for v1.

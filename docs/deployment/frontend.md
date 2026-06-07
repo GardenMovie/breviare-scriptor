@@ -1,6 +1,6 @@
 # Deployment — Frontend (Vercel)
 
-The Brevia frontend is deployed to Vercel. This document covers configuration for both the Next.js and Vite paths. The framework choice is tracked in [adr/0001-frontend-framework.md](../adr/0001-frontend-framework.md).
+The Breviare frontend is deployed to Vercel. This document covers configuration for both the Next.js and Vite paths. The framework choice is tracked in [adr/0001-frontend-framework.md](../adr/0001-frontend-framework.md).
 
 ---
 
@@ -27,7 +27,7 @@ The Brevia frontend is deployed to Vercel. This document covers configuration fo
   /api/v1/* → <RAILWAY_BACKEND_URL>/api/v1/*
   /:slug → <RAILWAY_BACKEND_URL>/:slug
   ```
-  This keeps all traffic under `brevia.sh` and avoids CORS complexity.
+  This keeps all traffic under `breviare.sh` and avoids CORS complexity.
 
 **Preview deployments:**
 - Vercel automatically creates a preview deployment for every pull request.
@@ -79,4 +79,4 @@ With Vite, API calls go directly to Railway's public URL. CORS must be configure
 - Auto-deploy on push: enabled
 - Cancel in-progress builds on new push: enabled (default)
 
-**Custom domain:** Set `brevia.sh` to point to Vercel in DNS settings once the domain is acquired.
+**Custom domain:** Set `breviare.sh` to point to Vercel in DNS settings once the domain is acquired.

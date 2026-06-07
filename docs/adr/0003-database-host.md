@@ -5,7 +5,7 @@
 
 ## Context
 
-Brevia uses PostgreSQL as its database. The host needs to be chosen. Three options are under active consideration: Neon, Supabase, and Railway's built-in Postgres add-on.
+Breviare uses PostgreSQL as its database. The host needs to be chosen. Three options are under active consideration: Neon, Supabase, and Railway's built-in Postgres add-on.
 
 The redirect hot path performs a single-row lookup on every click, so connection latency and pooling behavior are important. The backend is a long-running container on Railway (not serverless), which affects pooling requirements.
 
@@ -29,7 +29,7 @@ Supabase is a Postgres-based BaaS (backend-as-a-service) with a rich dashboard, 
 - **Pro:** Excellent dashboard for inspecting data during development
 - **Pro:** Built-in auth could potentially be leveraged instead of rolling custom auth (reduces scope)
 - **Pro:** Free tier includes 500 MB storage and 2 projects
-- **Con:** The additional BaaS layers (auth, realtime, REST API) are not needed and add noise if Brevia is building its own backend
+- **Con:** The additional BaaS layers (auth, realtime, REST API) are not needed and add noise if Breviare is building its own backend
 - **Con:** Free tier projects pause after 1 week of inactivity — a significant pain point for hobby/staging environments
 - **Con:** Slightly more vendor lock-in than raw Postgres if the Supabase SDK is used for anything beyond DB access
 
@@ -48,7 +48,7 @@ Railway offers a Postgres add-on that lives in the same Railway project as the b
 
 **Neon (Option A).**
 
-Brevia is building its own backend and auth, so Supabase's BaaS extras add noise rather than value. Railway Postgres is always-on but consumes the free credit quickly and lacks branching. Neon's free tier is the most generous for a hobby project, its PgBouncer pooler is a good fit for the long-running Railway backend, and database branching pairs well with Vercel preview deployments. The autosuspend cold-start is acceptable on staging; production can be kept warm by the redirect hot path itself.
+Breviare is building its own backend and auth, so Supabase's BaaS extras add noise rather than value. Railway Postgres is always-on but consumes the free credit quickly and lacks branching. Neon's free tier is the most generous for a hobby project, its PgBouncer pooler is a good fit for the long-running Railway backend, and database branching pairs well with Vercel preview deployments. The autosuspend cold-start is acceptable on staging; production can be kept warm by the redirect hot path itself.
 
 ## Consequences
 

@@ -1,6 +1,6 @@
 # Link Expiry
 
-Links in Brevia do not live forever. This document defines how and when links expire, what happens to them after expiry, and which links are exempt.
+Links in Breviare do not live forever. This document defines how and when links expire, what happens to them after expiry, and which links are exempt.
 
 ---
 
@@ -73,7 +73,7 @@ Short codes from expired links are not returned to the pool for reuse. The key s
 
 ## Vanity Link Exception
 
-Vanity links — `brevia.sh/<username>` redirects controlled by the user's account — are **never subject to expiry** while the user's account exists. The inactivity and absolute TTL mechanisms apply only to regular short links in the `links` table.
+Vanity links — `breviare.sh/<username>` redirects controlled by the user's account — are **never subject to expiry** while the user's account exists. The inactivity and absolute TTL mechanisms apply only to regular short links in the `links` table.
 
 If a user's account is deleted, their vanity path simply stops resolving (returns `404`). No expiry record is created; the path becomes orphaned.
 

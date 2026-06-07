@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Brevia is a three-tier web application: a React frontend, a REST API backend, and a PostgreSQL database. This document describes the responsibilities of each tier, the deployment targets, and the cross-cutting concerns that span all three.
+Breviare is a three-tier web application: a React frontend, a REST API backend, and a PostgreSQL database. This document describes the responsibilities of each tier, the deployment targets, and the cross-cutting concerns that span all three.
 
 For runtime data flows, see [data-flow.md](./data-flow.md). For the database schema, see [database-schema.md](./database-schema.md).
 
@@ -71,7 +71,7 @@ The backend is a long-running process (not serverless). This keeps connection po
 
 ## Request Routing
 
-All traffic enters through the Brevia domain (e.g. `brevia.sh`). Two categories of routes exist:
+All traffic enters through the Breviare domain (e.g. `breviare.sh`). Two categories of routes exist:
 
 | Path pattern | Handler | Notes |
 |---|---|---|

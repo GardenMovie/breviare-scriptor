@@ -12,7 +12,7 @@ A **301** means "this page has moved permanently." Browsers remember it. After t
 
 A **302** means "this is a temporary redirect." The browser checks the short link server every single time.
 
-For Brevia, I always use 302.
+For Breviare, I always use 302.
 
 The reason: analytics. If I use 301, I lose click data after the first visit per browser. I can't tell how many people clicked, where they came from, or when. The whole point of a URL shortener is partially to track that. 301 silently breaks it.
 

@@ -1,6 +1,6 @@
-# Brevia
+# Breviare
 
-A fast, analytics-aware URL shortener. Create short links instantly — no account required. Sign up to track clicks, manage your links, and get a permanent vanity link at `brevia.sh/<username>`.
+A fast, analytics-aware URL shortener. Create short links instantly — no account required. Sign up to track clicks, manage your links, and get a permanent vanity link at `breviare.sh/<username>`.
 
 ---
 
@@ -10,7 +10,7 @@ A fast, analytics-aware URL shortener. Create short links instantly — no accou
 - **Base52 short codes** — 6-character all-letter codes displayed as `aBc-DeF` for readability
 - **Analytics** — per-link click counts, referrers, countries, and time-series (authenticated users only)
 - **Link expiry** — links expire after 30 days of inactivity; authenticated users can set custom expiry
-- **Vanity links** — every account gets `brevia.sh/<username>` as a permanent personal redirect
+- **Vanity links** — every account gets `breviare.sh/<username>` as a permanent personal redirect
 - **302 redirects** — every click passes through the server so analytics are never lost to browser caching
 
 ---

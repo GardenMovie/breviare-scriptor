@@ -4,7 +4,7 @@
 
 ---
 
-Before I wrote any code for Brevia, I wrote the docs.
+Before I wrote any code for Breviare, I wrote the docs.
 
 Not a README. Actual architecture decisions — a folder of short files called ADRs (Architecture Decision Records). Each one asks: what did I decide, what were the options, and why did I choose this?
 

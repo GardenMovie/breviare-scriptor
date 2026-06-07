@@ -1,6 +1,6 @@
 # Data Flow
 
-This document describes how data moves through Brevia at runtime for each major operation. For the static structure of the system (tiers, deployment targets, responsibilities), see [overview.md](./overview.md). For the database tables referenced here, see [database-schema.md](./database-schema.md).
+This document describes how data moves through Breviare at runtime for each major operation. For the static structure of the system (tiers, deployment targets, responsibilities), see [overview.md](./overview.md). For the database tables referenced here, see [database-schema.md](./database-schema.md).
 
 ---
 
@@ -12,7 +12,7 @@ Two paths exist depending on whether the creator is authenticated.
 
 1. User submits a destination URL via the frontend form (no auth token present).
 2. Frontend sends `POST /api/v1/links` with the destination URL in the request body.
-3. Backend validates the URL (scheme must be `http` or `https`; host must be resolvable; not a Brevia domain to prevent redirect loops).
+3. Backend validates the URL (scheme must be `http` or `https`; host must be resolvable; not a Breviare domain to prevent redirect loops).
 4. Backend checks the anonymous rate limit for the caller's IP address.
 5. Backend generates a 6-character Base52 code and checks for uniqueness in `links.code`. Retries up to 10 times on collision.
 6. Backend inserts a row into `links` with `owner_id = NULL`, `inactivity_ttl_days = 30` (default), `absolute_expires_at = NULL`.
@@ -33,7 +33,7 @@ Steps 1–5 are identical, but with an `Authorization: Bearer <token>` header pr
 
 This is the hot path — it executes on every click.
 
-1. User visits `brevia.sh/aBc-DeF` (or `brevia.sh/abc-def` — case is preserved as-is).
+1. User visits `breviare.sh/aBc-DeF` (or `breviare.sh/abc-def` — case is preserved as-is).
 2. The request reaches the backend's catch-all route handler for `/:code`.
 3. Backend strips the display dash if present, normalizing to a 6-character code (`aBcDeF`).
 4. Backend queries `links` by `code` (index lookup).
@@ -60,9 +60,9 @@ The analytics write happens after the 302 is dispatched. This keeps the redirect
 
 ## Vanity Link Resolution Flow
 
-Vanity links (`brevia.sh/<username>`) share the same `/:slug` route as short codes. The backend must distinguish between them.
+Vanity links (`breviare.sh/<username>`) share the same `/:slug` route as short codes. The backend must distinguish between them.
 
-1. User visits `brevia.sh/john`.
+1. User visits `breviare.sh/john`.
 2. Backend receives the slug `john`.
 3. Backend first checks whether `john` matches a short code in `links.code` (6 characters, Base52). Since usernames can be any length and use a different character set, a 6-character all-letter slug could theoretically match both.
 
@@ -126,7 +126,7 @@ Sweep frequency: TBD (hourly is a reasonable starting point).
 2. Backend checks `users.username_change_count_this_month`. If ≥ 1 (and the previous change was in the current calendar month), return `429 Too Many Requests`.
 3. Backend validates the new username (length, characters, not reserved, not taken).
 4. Backend updates `users.username` to the new value, sets `username_changed_at = now()`, increments `username_change_count_this_month`.
-5. The old username path (`brevia.sh/<old_username>`) immediately becomes invalid — it will return `404` on the next request because no `users.username` row matches it anymore.
-6. The new username path (`brevia.sh/<new_username>`) becomes active immediately.
+5. The old username path (`breviare.sh/<old_username>`) immediately becomes invalid — it will return `404` on the next request because no `users.username` row matches it anymore.
+6. The new username path (`breviare.sh/<new_username>`) becomes active immediately.
 
 No redirect is issued from old username to new username. Users who bookmarked the old vanity link must be informed (via the UI) that the old path is no longer valid.

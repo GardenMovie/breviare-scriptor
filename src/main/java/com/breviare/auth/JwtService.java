@@ -19,9 +19,9 @@ public class JwtService {
     private final long refreshTokenExpiryDays;
 
     public JwtService(
-            @Value("${brevia.jwt.secret}") String secret,
-            @Value("${brevia.jwt.access-token-expiry-minutes}") long accessTokenExpiryMinutes,
-            @Value("${brevia.jwt.refresh-token-expiry-days}") long refreshTokenExpiryDays
+            @Value("${breviare.jwt.secret}") String secret,
+            @Value("${breviare.jwt.access-token-expiry-minutes}") long accessTokenExpiryMinutes,
+            @Value("${breviare.jwt.refresh-token-expiry-days}") long refreshTokenExpiryDays
     ) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpiryMinutes = accessTokenExpiryMinutes;

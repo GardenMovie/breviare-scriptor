@@ -1,6 +1,6 @@
 # Analytics
 
-Brevia records a click event on every redirect. Authenticated users who own a link can view aggregated analytics for it via the dashboard or the API.
+Breviare records a click event on every redirect. Authenticated users who own a link can view aggregated analytics for it via the dashboard or the API.
 
 ---
 
@@ -8,7 +8,7 @@ Brevia records a click event on every redirect. Authenticated users who own a li
 
 HTTP `301 Moved Permanently` responses are cached by browsers. After a user's first click, their browser stores the destination URL and navigates there directly on every subsequent visit — the backend is never contacted again. This makes click counting, timestamps, referrer tracking, and geo data impossible for repeat visitors.
 
-HTTP `302 Found` responses are not cached by default. Every click contacts the backend, and every click can be recorded. This is the core reason Brevia uses 302 for all redirects. See [adr/0004-redirect-strategy.md](../adr/0004-redirect-strategy.md).
+HTTP `302 Found` responses are not cached by default. Every click contacts the backend, and every click can be recorded. This is the core reason Breviare uses 302 for all redirects. See [adr/0004-redirect-strategy.md](../adr/0004-redirect-strategy.md).
 
 ---
 
@@ -32,7 +32,7 @@ The following data is captured for each redirect event and stored in `analytics_
 
 - IP addresses are hashed before storage using SHA-256 with a per-deployment secret salt. The hash allows approximate unique-visitor counting across clicks from the same IP without being reversible by anyone who gains access to the database.
 - Country-level geo is the maximum geographic resolution stored.
-- The `Referer` header can contain sensitive information (e.g. a URL with query parameters that include search terms or session tokens). Brevia stores the full referrer value as provided by the browser; users should be aware of this when sharing their analytics data with others.
+- The `Referer` header can contain sensitive information (e.g. a URL with query parameters that include search terms or session tokens). Breviare stores the full referrer value as provided by the browser; users should be aware of this when sharing their analytics data with others.
 - A privacy policy and data retention policy should be established before launch (see Retention below).
 
 ---
@@ -64,7 +64,7 @@ All aggregations are computed at query time from the `analytics_events` table. P
 
 ## Analytics on Vanity Links
 
-In v1, vanity link clicks (`brevia.sh/<username>`) do not generate analytics events. Vanity links serve as a personal landing redirect and analytics are out of scope for the initial release.
+In v1, vanity link clicks (`breviare.sh/<username>`) do not generate analytics events. Vanity links serve as a personal landing redirect and analytics are out of scope for the initial release.
 
 ---
 
