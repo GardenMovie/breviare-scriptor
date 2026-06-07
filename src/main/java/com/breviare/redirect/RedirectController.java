@@ -52,15 +52,19 @@ public class RedirectController {
             }
         }
 
-        // Vanity link: match by username (case-insensitive via citext)
-        return userRepository.findByUsername(slug)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping("/u/{username}")
+    public ResponseEntity<Void> resolveVanity(@PathVariable String username) {
+        return userRepository.findByUsername(username)
                 .map(user -> {
                     if (user.getVanityDestination() == null) {
-                        return ResponseEntity.<Void>notFound().build();
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).<Void>build();
                     }
                     return redirect(user.getVanityDestination());
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @GetMapping("/health")
