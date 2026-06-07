@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
-public class BreviaApplication {
+public class BreviareApplication {
     public static void main(String[] args) {
-        SpringApplication.run(BreviaApplication.class, args);
+        SpringApplication.run(BreviareApplication.class, args);
     }
 }

@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.breviare.common.BreviaException;
+import com.breviare.common.BreviareException;
 import com.breviare.users.User;
 import com.breviare.users.UserRepository;
 
@@ -24,10 +24,10 @@ public class AuthService {
     @Transactional
     public AuthResult register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email().toLowerCase())) {
-            throw BreviaException.conflict("Email already in use");
+            throw BreviareException.conflict("Email already in use");
         }
         if (userRepository.existsByUsername(request.username())) {
-            throw BreviaException.conflict("Username already taken");
+            throw BreviareException.conflict("Username already taken");
         }
 
         User user = new User();
@@ -41,10 +41,10 @@ public class AuthService {
 
     public AuthResult login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email().toLowerCase())
-                .orElseThrow(() -> new BreviaException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid credentials"));
+                .orElseThrow(() -> new BreviareException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid credentials"));
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new BreviaException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid credentials");
+            throw new BreviareException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid credentials");
         }
 
         return new AuthResult(user, jwtService.generateAccessToken(user.getId()), jwtService.generateRefreshToken(user.getId()));
@@ -52,7 +52,7 @@ public class AuthService {
 
     public String refresh(String refreshToken) {
         if (refreshToken == null || !jwtService.isValid(refreshToken)) {
-            throw new BreviaException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid or missing refresh token");
+            throw new BreviareException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid or missing refresh token");
         }
         return jwtService.generateAccessToken(jwtService.extractUserId(refreshToken));
     }

@@ -17,7 +17,7 @@ public class LinkController {
 
     private final LinkService linkService;
 
-    @Value("${brevia.base-url}")
+    @Value("${breviare.base-url}")
     private String baseUrl;
 
     public LinkController(LinkService linkService) {

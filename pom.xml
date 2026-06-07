@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.breviare</groupId>
-    <artifactId>brevia</artifactId>
+    <artifactId>breviare</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>brevia</name>
+    <name>breviare</name>
     <description>Fast, analytics-aware URL shortener</description>
 
     <properties>

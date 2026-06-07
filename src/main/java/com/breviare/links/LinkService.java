@@ -1,6 +1,6 @@
 package com.breviare.links;
 
-import com.breviare.common.BreviaException;
+import com.breviare.common.BreviareException;
 import com.breviare.users.User;
 import com.breviare.users.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ public class LinkService {
     private final UserRepository userRepository;
     private final SecureRandom random = new SecureRandom();
 
-    @Value("${brevia.base-url}")
+    @Value("${breviare.base-url}")
     private String baseUrl;
 
     public LinkService(LinkRepository linkRepository, UserRepository userRepository) {
@@ -46,7 +46,7 @@ public class LinkService {
             if (request.inactivityTtlDays() != null) link.setInactivityTtlDays(request.inactivityTtlDays());
             if (request.absoluteExpiresAt() != null) {
                 if (request.absoluteExpiresAt().isBefore(Instant.now())) {
-                    throw BreviaException.badRequest("absolute_expires_at must be in the future");
+                    throw BreviareException.badRequest("absolute_expires_at must be in the future");
                 }
                 link.setAbsoluteExpiresAt(request.absoluteExpiresAt());
             }
@@ -56,11 +56,11 @@ public class LinkService {
     }
 
     public Link getByCode(String code, UUID requesterId) {
-        Link link = linkRepository.findByCode(code).orElseThrow(() -> BreviaException.notFound("Link not found"));
+        Link link = linkRepository.findByCode(code).orElseThrow(() -> BreviareException.notFound("Link not found"));
         checkExpired(link);
         if (link.getOwner() != null) {
-            if (requesterId == null) throw BreviaException.notFound("Link not found");
-            if (!link.getOwner().getId().equals(requesterId)) throw BreviaException.forbidden("Not the owner");
+            if (requesterId == null) throw BreviareException.notFound("Link not found");
+            if (!link.getOwner().getId().equals(requesterId)) throw BreviareException.forbidden("Not the owner");
         }
         return link;
     }
@@ -109,13 +109,13 @@ public class LinkService {
     }
 
     private void checkExpired(Link link) {
-        if (link.isExpired()) throw BreviaException.gone("Link has expired");
+        if (link.isExpired()) throw BreviareException.gone("Link has expired");
         Instant now = Instant.now();
         boolean inactivityExpired = link.getLastClickedAt()
                 .plusSeconds((long) link.getInactivityTtlDays() * 86400)
                 .isBefore(now);
         boolean absoluteExpired = link.getAbsoluteExpiresAt() != null && link.getAbsoluteExpiresAt().isBefore(now);
-        if (inactivityExpired || absoluteExpired) throw BreviaException.gone("Link has expired");
+        if (inactivityExpired || absoluteExpired) throw BreviareException.gone("Link has expired");
     }
 
     private String generateUniqueCode() {
@@ -123,7 +123,7 @@ public class LinkService {
             String code = randomCode();
             if (linkRepository.findByCode(code).isEmpty()) return code;
         }
-        throw BreviaException.serviceUnavailable("Could not generate a unique short code, please try again");
+        throw BreviareException.serviceUnavailable("Could not generate a unique short code, please try again");
     }
 
     private String randomCode() {
