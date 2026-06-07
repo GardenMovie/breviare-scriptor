@@ -108,10 +108,6 @@ public class LinkService {
         linkRepository.expireByInactivity(now, now.minusSeconds(30L * 86400));
     }
 
-    public String buildShortUrl(Link link) {
-        return baseUrl + "/" + link.getCode();
-    }
-
     private void checkExpired(Link link) {
         if (link.isExpired()) throw BreviaException.gone("Link has expired");
         Instant now = Instant.now();
@@ -136,6 +132,7 @@ public class LinkService {
         return sb.toString();
     }
 
+    // Convoluted but allows for opaque cursors in the future
     private int parseCursor(String cursor) {
         if (cursor == null || cursor.isBlank()) return 0;
         try { return Integer.parseInt(cursor); } catch (NumberFormatException e) { return 0; }
