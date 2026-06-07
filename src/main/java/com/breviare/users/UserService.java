@@ -1,6 +1,6 @@
 package com.breviare.users;
 
-import com.breviare.common.BreviaException;
+import com.breviare.common.BreviareException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +12,6 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    private static final int MAX_USERNAME_CHANGES_PER_MONTH = 1;
     private static final int MAX_VANITY_CHANGES_PER_MONTH = 5;
 
     private final UserRepository userRepository;
@@ -22,7 +21,7 @@ public class UserService {
     }
 
     public User getById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> BreviaException.notFound("User not found"));
+        return userRepository.findById(id).orElseThrow(() -> BreviareException.notFound("User not found"));
     }
 
     @Transactional
@@ -30,22 +29,20 @@ public class UserService {
         User user = getById(userId);
 
         if (request.username() != null) {
-            resetMonthlyCounterIfNeeded(user);
-            if (user.getUsernameChangeCountThisMonth() >= MAX_USERNAME_CHANGES_PER_MONTH) {
-                throw BreviaException.rateLimited("Username can only be changed once per month");
+            if (changedThisMonth(user.getUsernameChangedAt())) {
+                throw BreviareException.rateLimited("Username can only be changed once per month");
             }
             if (userRepository.existsByUsername(request.username())) {
-                throw BreviaException.conflict("Username already taken");
+                throw BreviareException.conflict("Username already taken");
             }
             user.setUsername(request.username());
             user.setUsernameChangedAt(Instant.now());
-            user.setUsernameChangeCountThisMonth(user.getUsernameChangeCountThisMonth() + 1);
         }
 
         if (request.vanityDestination() != null) {
-            resetMonthlyCounterIfNeeded(user);
+            resetVanityCounterIfNeeded(user);
             if (user.getVanityDestinationChangeCountThisMonth() >= MAX_VANITY_CHANGES_PER_MONTH) {
-                throw BreviaException.rateLimited("Vanity destination can only be changed 5 times per month");
+                throw BreviareException.rateLimited("Vanity destination can only be changed 5 times per month");
             }
             user.setVanityDestination(request.vanityDestination().isEmpty() ? null : request.vanityDestination());
             user.setVanityDestinationChangedAt(Instant.now());
@@ -60,15 +57,16 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    private void resetMonthlyCounterIfNeeded(User user) {
-        YearMonth currentMonth = YearMonth.now(ZoneOffset.UTC);
-
-        if (user.getUsernameChangedAt() != null) {
-            YearMonth changedMonth = YearMonth.from(user.getUsernameChangedAt().atOffset(ZoneOffset.UTC));
-            if (!changedMonth.equals(currentMonth)) {
-                user.setUsernameChangeCountThisMonth(0);
-            }
+    private boolean changedThisMonth(Instant changedAt) {
+        if (changedAt == null) {
+            return false;
         }
+        YearMonth changedMonth = YearMonth.from(changedAt.atOffset(ZoneOffset.UTC));
+        return changedMonth.equals(YearMonth.now(ZoneOffset.UTC));
+    }
+
+    private void resetVanityCounterIfNeeded(User user) {
+        YearMonth currentMonth = YearMonth.now(ZoneOffset.UTC);
 
         if (user.getVanityDestinationChangedAt() != null) {
             YearMonth changedMonth = YearMonth.from(user.getVanityDestinationChangedAt().atOffset(ZoneOffset.UTC));
