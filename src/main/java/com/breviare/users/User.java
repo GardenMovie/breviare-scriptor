@@ -8,6 +8,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
 
+    // we will use google auth, no email password
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -15,22 +16,18 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String passwordHash;
-
     @Column(nullable = false, unique = true, columnDefinition = "citext")
     private String username;
 
+    // user can only change their username once a month
     private Instant usernameChangedAt;
-
-    @Column(nullable = false)
-    private int usernameChangeCountThisMonth = 0;
 
     private String vanityDestination;
 
     @Column(nullable = false)
     private int vanityDestinationChangeCountThisMonth = 0;
 
+    // For the destination we only care about how many were changed this month
     private Instant vanityDestinationChangedAt;
 
     @Column(nullable = false, updatable = false)
@@ -42,14 +39,10 @@ public class User {
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public Instant getUsernameChangedAt() { return usernameChangedAt; }
     public void setUsernameChangedAt(Instant usernameChangedAt) { this.usernameChangedAt = usernameChangedAt; }
-    public int getUsernameChangeCountThisMonth() { return usernameChangeCountThisMonth; }
-    public void setUsernameChangeCountThisMonth(int count) { this.usernameChangeCountThisMonth = count; }
     public String getVanityDestination() { return vanityDestination; }
     public void setVanityDestination(String vanityDestination) { this.vanityDestination = vanityDestination; }
     public int getVanityDestinationChangeCountThisMonth() { return vanityDestinationChangeCountThisMonth; }

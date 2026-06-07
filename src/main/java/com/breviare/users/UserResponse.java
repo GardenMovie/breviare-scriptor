@@ -1,6 +1,8 @@
 package com.breviare.users;
 
 import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
 
 public record UserResponse(
         String id,
@@ -20,10 +22,18 @@ public record UserResponse(
                 user.getUsername(),
                 user.getVanityDestination(),
                 user.getUsernameChangedAt(),
-                Math.max(0, 1 - user.getUsernameChangeCountThisMonth()),
+                changedThisMonth(user.getUsernameChangedAt()) ? 0 : 1,
                 user.getVanityDestinationChangedAt(),
                 Math.max(0, 5 - user.getVanityDestinationChangeCountThisMonth()),
                 user.getCreatedAt()
         );
+    }
+
+    private static boolean changedThisMonth(Instant changedAt) {
+        if (changedAt == null) {
+            return false;
+        }
+        YearMonth changedMonth = YearMonth.from(changedAt.atOffset(ZoneOffset.UTC));
+        return changedMonth.equals(YearMonth.now(ZoneOffset.UTC));
     }
 }
