@@ -15,7 +15,7 @@ import java.util.Arrays;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private static final String REFRESH_COOKIE = "brevia_refresh";
+    private static final String REFRESH_COOKIE = "breviare_refresh";
 
     private final AuthService authService;
 

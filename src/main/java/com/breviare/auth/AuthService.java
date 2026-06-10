@@ -1,53 +1,28 @@
 package com.breviare.auth;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.breviare.common.BreviareException;
-import com.breviare.users.User;
-import com.breviare.users.UserRepository;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthService(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
-    @Transactional
+    // Password auth was removed in favour of Google sign-in, which is not wired up yet.
+    // These endpoints are intentionally stubbed until Google ID-token verification lands.
     public AuthResult register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.email().toLowerCase())) {
-            throw BreviareException.conflict("Email already in use");
-        }
-        if (userRepository.existsByUsername(request.username())) {
-            throw BreviareException.conflict("Username already taken");
-        }
-
-        User user = new User();
-        user.setEmail(request.email().toLowerCase());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setUsername(request.username());
-        userRepository.save(user);
-
-        return new AuthResult(user, jwtService.generateAccessToken(user.getId()), jwtService.generateRefreshToken(user.getId()));
+        throw new BreviareException(HttpStatus.NOT_IMPLEMENTED, "NOT_IMPLEMENTED",
+                "Registration is being migrated to Google sign-in and is temporarily unavailable");
     }
 
     public AuthResult login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email().toLowerCase())
-                .orElseThrow(() -> new BreviareException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid credentials"));
-
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new BreviareException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid credentials");
-        }
-
-        return new AuthResult(user, jwtService.generateAccessToken(user.getId()), jwtService.generateRefreshToken(user.getId()));
+        throw new BreviareException(HttpStatus.NOT_IMPLEMENTED, "NOT_IMPLEMENTED",
+                "Password login has been removed; Google sign-in is not available yet");
     }
 
     public String refresh(String refreshToken) {

@@ -23,6 +23,7 @@ public class AnalyticsEvent {
     private String referrer;
     private String userAgent;
 
+    // Not sure I want IPs, country code is more than enough for analytics and we can use it for rate limiting without worrying about GDPR, also we can use a hash of the IP for some basic analytics without storing the actual IP
     @Column(length = 64)
     private String ipHash;
 

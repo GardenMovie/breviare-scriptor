@@ -45,6 +45,7 @@ public class UserService {
                 throw BreviareException.rateLimited("Vanity destination can only be changed 5 times per month");
             }
             user.setVanityDestination(request.vanityDestination().isEmpty() ? null : request.vanityDestination());
+            // Ideally we would only update this if its the first change in the month, so its 30 days from the first change
             user.setVanityDestinationChangedAt(Instant.now());
             user.setVanityDestinationChangeCountThisMonth(user.getVanityDestinationChangeCountThisMonth() + 1);
         }
@@ -65,6 +66,7 @@ public class UserService {
         return changedMonth.equals(YearMonth.now(ZoneOffset.UTC));
     }
 
+    // This is wrong, reset happens monthly not 30 days
     private void resetVanityCounterIfNeeded(User user) {
         YearMonth currentMonth = YearMonth.now(ZoneOffset.UTC);
 

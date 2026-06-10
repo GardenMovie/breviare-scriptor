@@ -28,6 +28,7 @@ public class AnalyticsService {
         String referrer = request.getHeader("Referer");
         String userAgent = request.getHeader("User-Agent");
 
+        // TODO: resolve countryCode from ip via GeoIP lookup instead of passing null
         analyticsRepository.save(new AnalyticsEvent(link, referrer, userAgent, ipHash, null));
     }
 
