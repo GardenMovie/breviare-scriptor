@@ -5,8 +5,6 @@ import com.breviare.links.LinkResponse;
 import com.breviare.links.LinkService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,35 +22,35 @@ public class UserController {
         this.linkService = linkService;
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponse>> getProfile(@AuthenticationPrincipal UserDetails principal) {
-        User user = userService.getById(UUID.fromString(principal.getUsername()));
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getProfile(@PathVariable UUID id) {
+        User user = userService.getById(id);
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
-    @PatchMapping("/me")
+    @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
-            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable UUID id,
             @Valid @RequestBody UpdateProfileRequest request
     ) {
-        User user = userService.updateProfile(UUID.fromString(principal.getUsername()), request);
+        User user = userService.updateProfile(id, request);
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
     }
 
-    @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal UserDetails principal) {
-        userService.deleteAccount(UUID.fromString(principal.getUsername()));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable UUID id) {
+        userService.deleteAccount(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/me/links")
+    @GetMapping("/{id}/links")
     public ResponseEntity<ApiResponse<List<LinkResponse>>> listLinks(
-            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable UUID id,
             @RequestParam(defaultValue = "20") int limit,
             @RequestParam(defaultValue = "false") boolean includeExpired,
             @RequestParam(required = false) String cursor
     ) {
-        var page = linkService.listForOwner(UUID.fromString(principal.getUsername()), limit, includeExpired, cursor);
+        var page = linkService.listForOwner(id, limit, includeExpired, cursor);
         return ResponseEntity.ok(ApiResponse.ok(page));
     }
 }
