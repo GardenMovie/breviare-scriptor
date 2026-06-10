@@ -29,6 +29,7 @@ public record UserResponse(
         );
     }
 
+    // Shouldnt it be 30 days? Montly works but its convoluted
     private static boolean changedThisMonth(Instant changedAt) {
         if (changedAt == null) {
             return false;

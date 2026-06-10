@@ -4,7 +4,6 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 CREATE TABLE users (
     id                                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     email                                   TEXT        NOT NULL UNIQUE,
-    password_hash                           TEXT        NOT NULL,
     username                                CITEXT      NOT NULL UNIQUE,
     username_changed_at                     TIMESTAMPTZ,
     username_change_count_this_month        INTEGER     NOT NULL DEFAULT 0,
@@ -20,7 +19,7 @@ CREATE INDEX users_username_idx ON users (username);
 
 CREATE TABLE links (
     id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    code                CHAR(6)     NOT NULL UNIQUE,
+    code                VARCHAR(6)  NOT NULL UNIQUE,
     destination         TEXT        NOT NULL,
     owner_id            UUID        REFERENCES users (id) ON DELETE SET NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -44,8 +43,8 @@ CREATE TABLE analytics_events (
     clicked_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     referrer     TEXT,
     user_agent   TEXT,
-    ip_hash      CHAR(64),
-    country_code CHAR(2)
+    ip_hash      VARCHAR(64),
+    country_code VARCHAR(2)
 );
 
 CREATE INDEX analytics_events_link_id_clicked_at_idx ON analytics_events (link_id, clicked_at DESC);

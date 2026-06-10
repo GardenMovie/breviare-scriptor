@@ -27,7 +27,7 @@ public class User {
     @Column(nullable = false)
     private int vanityDestinationChangeCountThisMonth = 0;
 
-    // For the destination we only care about how many were changed this month
+    // For the destination we only care about how many were changed this month, maybe change so it a record of the first change in the 30 day period
     private Instant vanityDestinationChangedAt;
 
     @Column(nullable = false, updatable = false)
