@@ -41,6 +41,10 @@ public class BreviareException extends RuntimeException {
         return new BreviareException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message);
     }
 
+    public static BreviareException unprocessableEntity(String message) {
+        return new BreviareException(HttpStatus.UNPROCESSABLE_ENTITY, "REJECTED", message);
+    }
+
     public HttpStatus getStatus() { return status; }
     public String getCode() { return code; }
 }
