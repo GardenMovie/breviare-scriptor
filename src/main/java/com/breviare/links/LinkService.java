@@ -24,18 +24,21 @@ public class LinkService {
 
     private final LinkRepository linkRepository;
     private final UserRepository userRepository;
+    private final LinkValidationService linkValidationService;
     private final SecureRandom random = new SecureRandom();
 
     @Value("${breviare.base-url}")
     private String baseUrl;
 
-    public LinkService(LinkRepository linkRepository, UserRepository userRepository) {
+    public LinkService(LinkRepository linkRepository, UserRepository userRepository, LinkValidationService linkValidationService) {
         this.linkRepository = linkRepository;
         this.userRepository = userRepository;
+        this.linkValidationService = linkValidationService;
     }
 
     @Transactional
     public Link create(CreateLinkRequest request, UUID ownerId) {
+        linkValidationService.validate(request.destination());
         Link link = new Link();
         link.setCode(generateUniqueCode());
         link.setDestination(request.destination());
@@ -71,6 +74,7 @@ public class LinkService {
 
     @Transactional
     public Link update(String code, UpdateLinkRequest request, UUID requesterId) {
+        if (request.destination() != null) linkValidationService.validate(request.destination());
         Link link = getByCode(code, requesterId);
         if (request.destination() != null) link.setDestination(request.destination());
         if (request.inactivityTtlDays() != null) link.setInactivityTtlDays(request.inactivityTtlDays());
