@@ -1,4 +1,5 @@
 target/
+docs/*
 *.pem
 .mvn/wrapper/maven-wrapper.jar
 *.class
