@@ -67,7 +67,7 @@ public class RedirectController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @GetMapping("/health")
+    @GetMapping("/api/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("{\"status\":\"ok\"}");
     }
