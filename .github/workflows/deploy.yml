@@ -26,7 +26,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: target/breviare-0.0.1-SNAPSHOT.jar
+          source: target/breviare.jar
           target: /opt/breviare/
           strip_components: 1
 

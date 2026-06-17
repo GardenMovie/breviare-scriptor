@@ -5,7 +5,7 @@ After=network.target postgresql.service
 [Service]
 User=ubuntu
 WorkingDirectory=/opt/breviare
-ExecStart=/usr/bin/java -jar -Dspring.profiles.active=prod /opt/breviare/breviare-0.0.1-SNAPSHOT.jar
+ExecStart=/usr/bin/java -jar -Dspring.profiles.active=prod /opt/breviare/breviare.jar
 Restart=on-failure
 RestartSec=10
 

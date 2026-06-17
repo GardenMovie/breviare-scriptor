@@ -13,7 +13,7 @@
 
     <groupId>com.breviare</groupId>
     <artifactId>breviare</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2</version>
     <name>breviare</name>
     <description>Fast, analytics-aware URL shortener</description>
 
@@ -72,6 +72,7 @@
     </dependencies>
 
     <build>
+        <finalName>breviare</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
