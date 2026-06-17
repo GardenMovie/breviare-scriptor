@@ -31,6 +31,6 @@ server:
   port: ${PORT:8080}
 
 breviare:
-  base-url: ${BASE_URL:https://breviare.sh}
+  base-url: ${BASE_URL:https://breviare-iter.vercel.app/}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
