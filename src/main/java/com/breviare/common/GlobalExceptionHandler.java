@@ -3,6 +3,7 @@ package com.breviare.common;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleBreviare(BreviareException ex) {
         return ResponseEntity.status(ex.getStatus())
                 .body(ApiResponse.error(new ApiResponse.ApiError(ex.getCode(), ex.getMessage())));
+    }
+
+    @ExceptionHandler(ErrorResponseException.class)
+    public ResponseEntity<ApiResponse<?>> handleErrorResponse(ErrorResponseException ex) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        return ResponseEntity.status(status)
+                .body(ApiResponse.error(new ApiResponse.ApiError(status.name(), status.getReasonPhrase())));
     }
 
     @ExceptionHandler(Exception.class)
