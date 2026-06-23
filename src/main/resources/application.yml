@@ -31,6 +31,10 @@ server:
   port: ${PORT:8080}
 
 breviare:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiry-minutes: 15
+    refresh-token-expiry-days: 30
   base-url: ${BASE_URL:https://breviare-iter.vercel.app}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
