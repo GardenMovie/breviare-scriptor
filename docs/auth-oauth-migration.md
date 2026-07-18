@@ -71,5 +71,8 @@ If a future need arises to let one user link multiple providers, this can be spl
 - Send the ID token to `POST /api/v1/auth/google`; handle the same `AuthResponse` shape as before (`{ user, accessToken }` + refresh cookie set by the server).
 - If the returned `user.username` is null, show a "claim your username" step immediately after sign-in (this is also the user's vanity link slug). Debounce input against `GET /api/v1/users/username-availability` and block submission until available; on submit, call `POST /api/v1/users/username` then proceed into the app.
 
+## Known issues
+- **Refresh cookie `SameSite` is unset.** `AuthController.setRefreshCookie` builds a raw `jakarta.servlet.http.Cookie`, which has no `SameSite` setter, so the attribute defaults to whatever the servlet container/browser applies (effectively `Lax`). `Secure` and `HttpOnly` are set correctly, and the cookie is path-scoped to `/api/v1/auth/refresh`. This works as long as the frontend reaches the backend **same-origin** (e.g. via the Vercel proxy). If any hop becomes cross-site, the browser will drop the cookie on the `/auth/refresh` call and users will appear logged out on reload. To make it robust across cross-site hops, switch to `ResponseCookie` (or set the header manually) with `SameSite=None; Secure`.
+
 ## Open questions
 - Future: if GitHub (or another provider) is added later, the unique constraint on `(provider, provider_user_id)` already supports it without further schema changes — only a second `provider` value and service implementation would be needed.

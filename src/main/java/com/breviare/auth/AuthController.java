@@ -36,10 +36,10 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<RefreshResponse>> refresh(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(HttpServletRequest request) {
         String refreshToken = extractRefreshCookie(request);
-        String accessToken = authService.refresh(refreshToken);
-        return ResponseEntity.ok(ApiResponse.ok(new RefreshResponse(accessToken)));
+        AuthResponse result = authService.refresh(refreshToken);
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
     @PostMapping("/logout")
