@@ -55,4 +55,21 @@ public class UserController {
         var page = linkService.listForOwner(UUID.fromString(principal.getUsername()), limit, includeExpired, cursor);
         return ResponseEntity.ok(ApiResponse.ok(page));
     }
+
+    @GetMapping("/username-availability")
+    public ResponseEntity<ApiResponse<UsernameAvailabilityResponse>> usernameAvailability(
+            @RequestParam String username
+    ) {
+        boolean available = userService.isUsernameAvailable(username);
+        return ResponseEntity.ok(ApiResponse.ok(new UsernameAvailabilityResponse(available)));
+    }
+
+    @PostMapping("/username")
+    public ResponseEntity<ApiResponse<UserResponse>> claimUsername(
+            @AuthenticationPrincipal UserDetails principal,
+            @Valid @RequestBody ClaimUsernameRequest request
+    ) {
+        User user = userService.claimUsername(UUID.fromString(principal.getUsername()), request.username());
+        return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
+    }
 }
