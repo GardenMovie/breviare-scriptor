@@ -35,6 +35,9 @@ breviare:
     secret: ${JWT_SECRET}
     access-token-expiry-minutes: 15
     refresh-token-expiry-days: 30
+  oauth:
+    google:
+      client-id: ${GOOGLE_CLIENT_ID}
   base-url: ${BASE_URL:https://breviare-iter.vercel.app}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

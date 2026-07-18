@@ -4,7 +4,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.breviare.common.ApiResponse;
@@ -18,27 +17,20 @@ public class AuthController {
     private static final String REFRESH_COOKIE = "breviare_refresh";
 
     private final AuthService authService;
+    private final GoogleAuthService googleAuthService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, GoogleAuthService googleAuthService) {
         this.authService = authService;
+        this.googleAuthService = googleAuthService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(
-            @Valid @RequestBody RegisterRequest request,
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> google(
+            @Valid @RequestBody GoogleAuthRequest request,
             HttpServletResponse response
     ) {
-        AuthResult result = authService.register(request);
-        setRefreshCookie(response, result.refreshToken());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(result.toResponse()));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(
-            @Valid @RequestBody LoginRequest request,
-            HttpServletResponse response
-    ) {
-        AuthResult result = authService.login(request);
+        var user = googleAuthService.verifyAndResolveUser(request.idToken());
+        AuthResult result = authService.issueTokens(user);
         setRefreshCookie(response, result.refreshToken());
         return ResponseEntity.ok(ApiResponse.ok(result.toResponse()));
     }
