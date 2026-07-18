@@ -24,6 +24,23 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> BreviareException.notFound("User not found"));
     }
 
+    public boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
+
+    @Transactional
+    public User claimUsername(UUID userId, String username) {
+        User user = getById(userId);
+        if (user.getUsername() != null) {
+            throw BreviareException.conflict("Username already claimed; use the profile update endpoint to change it");
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw BreviareException.conflict("Username already taken");
+        }
+        user.setUsername(username);
+        return userRepository.save(user);
+    }
+
     @Transactional
     public User updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = getById(userId);
@@ -40,6 +57,9 @@ public class UserService {
         }
 
         if (request.vanityDestination() != null) {
+            if (user.getUsername() == null) {
+                throw BreviareException.badRequest("You must claim a username before setting a vanity destination");
+            }
             resetVanityCounterIfNeeded(user);
             if (user.getVanityDestinationChangeCountThisMonth() >= MAX_VANITY_CHANGES_PER_MONTH) {
                 throw BreviareException.rateLimited("Vanity destination can only be changed 5 times per month");

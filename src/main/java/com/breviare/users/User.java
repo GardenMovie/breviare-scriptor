@@ -16,11 +16,17 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true, columnDefinition = "citext")
+    @Column(unique = true, columnDefinition = "citext")
     private String username;
 
     // user can only change their username once a month
     private Instant usernameChangedAt;
+
+    @Column(nullable = false)
+    private String provider;
+
+    @Column(name = "provider_user_id", nullable = false)
+    private String providerUserId;
 
     private String vanityDestination;
 
@@ -43,6 +49,10 @@ public class User {
     public void setUsername(String username) { this.username = username; }
     public Instant getUsernameChangedAt() { return usernameChangedAt; }
     public void setUsernameChangedAt(Instant usernameChangedAt) { this.usernameChangedAt = usernameChangedAt; }
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
+    public String getProviderUserId() { return providerUserId; }
+    public void setProviderUserId(String providerUserId) { this.providerUserId = providerUserId; }
     public String getVanityDestination() { return vanityDestination; }
     public void setVanityDestination(String vanityDestination) { this.vanityDestination = vanityDestination; }
     public int getVanityDestinationChangeCountThisMonth() { return vanityDestinationChangeCountThisMonth; }
