@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: mvn package -DskipTests
+        run: mvn package
 
       - name: Backup current JAR
         uses: appleboy/ssh-action@v1.0.3
