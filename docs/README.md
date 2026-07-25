@@ -1,6 +1,5 @@
 # Breviare
 
-
 A fast, analytics-aware URL shortener. Create short links instantly — no account required. Sign up to track clicks, manage your links, and get a permanent vanity link at `breviare.sh/<username>`.
 
 ---
