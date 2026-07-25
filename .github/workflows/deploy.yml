@@ -53,12 +53,12 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            for i in $(seq 1 10); do
+            for i in $(seq 1 15); do
               if curl -sf http://localhost:8080/api/health > /dev/null; then
                 echo "Healthy"
                 exit 0
               fi
-              sleep 3
+              sleep 20
             done
             echo "Health check failed, rolling back"
             cp /opt/breviare/breviare.jar.bak /opt/breviare/breviare.jar
