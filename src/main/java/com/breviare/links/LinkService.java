@@ -1,5 +1,6 @@
 package com.breviare.links;
 
+import com.breviare.analytics.AnalyticsService;
 import com.breviare.common.BreviareException;
 import com.breviare.users.User;
 import com.breviare.users.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,15 +27,18 @@ public class LinkService {
     private final LinkRepository linkRepository;
     private final UserRepository userRepository;
     private final LinkValidationService linkValidationService;
+    private final AnalyticsService analyticsService;
     private final SecureRandom random = new SecureRandom();
 
     @Value("${breviare.base-url}")
     private String baseUrl;
 
-    public LinkService(LinkRepository linkRepository, UserRepository userRepository, LinkValidationService linkValidationService) {
+    public LinkService(LinkRepository linkRepository, UserRepository userRepository,
+                        LinkValidationService linkValidationService, AnalyticsService analyticsService) {
         this.linkRepository = linkRepository;
         this.userRepository = userRepository;
         this.linkValidationService = linkValidationService;
+        this.analyticsService = analyticsService;
     }
 
     @Transactional
@@ -91,7 +96,8 @@ public class LinkService {
     public List<LinkResponse> listForOwner(UUID ownerId, int limit, boolean includeExpired, String cursor) {
         int page = parseCursor(cursor);
         var links = linkRepository.findByOwnerPaged(ownerId, includeExpired, PageRequest.of(page, Math.min(limit, 100)));
-        return links.stream().map(l -> LinkResponse.from(l, baseUrl)).toList();
+        Map<UUID, Long> clicksLast7Days = analyticsService.clicksLast7DaysForLinks(links.stream().map(Link::getId).toList());
+        return links.stream().map(l -> LinkResponse.from(l, baseUrl, clicksLast7Days.getOrDefault(l.getId(), 0L))).toList();
     }
 
     // Analytics seem to be a little weak here

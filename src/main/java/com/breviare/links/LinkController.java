@@ -1,5 +1,6 @@
 package com.breviare.links;
 
+import com.breviare.analytics.AnalyticsService;
 import com.breviare.common.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,12 +17,14 @@ import java.util.UUID;
 public class LinkController {
 
     private final LinkService linkService;
+    private final AnalyticsService analyticsService;
 
     @Value("${breviare.base-url}")
     private String baseUrl;
 
-    public LinkController(LinkService linkService) {
+    public LinkController(LinkService linkService, AnalyticsService analyticsService) {
         this.linkService = linkService;
+        this.analyticsService = analyticsService;
     }
 
     @PostMapping
@@ -41,7 +44,8 @@ public class LinkController {
     ) {
         UUID requesterId = principal != null ? UUID.fromString(principal.getUsername()) : null;
         Link link = linkService.getByCode(code, requesterId);
-        return ResponseEntity.ok(ApiResponse.ok(LinkResponse.from(link, baseUrl)));
+        long clicksLast7Days = analyticsService.clicksLast7Days(link.getId());
+        return ResponseEntity.ok(ApiResponse.ok(LinkResponse.from(link, baseUrl, clicksLast7Days)));
     }
 
     @PatchMapping("/{code}")
@@ -52,7 +56,8 @@ public class LinkController {
     ) {
         UUID requesterId = UUID.fromString(principal.getUsername());
         Link link = linkService.update(code, request, requesterId);
-        return ResponseEntity.ok(ApiResponse.ok(LinkResponse.from(link, baseUrl)));
+        long clicksLast7Days = analyticsService.clicksLast7Days(link.getId());
+        return ResponseEntity.ok(ApiResponse.ok(LinkResponse.from(link, baseUrl, clicksLast7Days)));
     }
 
     @DeleteMapping("/{code}")
