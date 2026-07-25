@@ -20,6 +20,14 @@ jobs:
       - name: Build JAR
         run: mvn package -DskipTests
 
+      - name: Backup current JAR
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: cp /opt/breviare/breviare.jar /opt/breviare/breviare.jar.bak
+
       - name: Copy JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -36,4 +44,23 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: sudo systemctl restart breviare
+          script: systemctl --user restart breviare
+
+      - name: Health check with rollback
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            for i in $(seq 1 10); do
+              if curl -sf http://localhost:8080/api/health > /dev/null; then
+                echo "Healthy"
+                exit 0
+              fi
+              sleep 3
+            done
+            echo "Health check failed, rolling back"
+            cp /opt/breviare/breviare.jar.bak /opt/breviare/breviare.jar
+            systemctl --user restart breviare
+            exit 1
