@@ -26,19 +26,23 @@ public class LinkValidationService {
     private final RestClient restClient;
     private final BlocklistRepository blocklistRepository;
     private final String safeBrowsingApiKey;
+    private final String ownDomain;
 
     public LinkValidationService(
             RestClient.Builder restClientBuilder,
             BlocklistRepository blocklistRepository,
-            @Value("${GOOGLE_SAFE_BROWSING_API_KEY:}") String safeBrowsingApiKey
+            @Value("${GOOGLE_SAFE_BROWSING_API_KEY:}") String safeBrowsingApiKey,
+            @Value("${breviare.base-url}") String baseUrl
     ) {
         this.restClient = restClientBuilder.build();
         this.blocklistRepository = blocklistRepository;
         this.safeBrowsingApiKey = safeBrowsingApiKey;
+        this.ownDomain = normaliseHost(URI.create(baseUrl).getHost());
     }
 
     public void validate(String destination) {
         URI uri = parseAndCheckScheme(destination);
+        checkNotOwnDomain(uri.getHost());
         checkBlocklist(uri.getHost());
         checkSafeBrowsing(destination);
     }
@@ -57,12 +61,23 @@ public class LinkValidationService {
         return uri;
     }
 
+    private void checkNotOwnDomain(String host) {
+        if (host == null || ownDomain == null) return;
+        String normalised = normaliseHost(host);
+        if (normalised.equals(ownDomain) || normalised.endsWith("." + ownDomain)) {
+            throw BreviareException.badRequest("URL cannot point back to a breviare short link");
+        }
+    }
+
     private void checkBlocklist(String host) {
         if (host == null) return;
-        String normalised = host.toLowerCase().replaceFirst("^www\\.", "");
-        if (blocklistRepository.existsByDomain(normalised)) {
+        if (blocklistRepository.existsByDomain(normaliseHost(host))) {
             throw BreviareException.unprocessableEntity("URL is not allowed");
         }
+    }
+
+    private static String normaliseHost(String host) {
+        return host == null ? null : host.toLowerCase().replaceFirst("^www\\.", "");
     }
 
     private void checkSafeBrowsing(String destination) {
