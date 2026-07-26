@@ -62,6 +62,26 @@ public class AnalyticsService {
         return rolledUp + liveToday;
     }
 
+    // Per-day breakdown for the last 7 days: days 1-6 from the rollup table, today live, in
+    // chronological order. Zero-fills days with no rows/clicks so the caller always gets exactly
+    // 7 entries.
+    public List<Map<String, Object>> dailyClicksLast7Days(UUID linkId) {
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate sinceDay = today.minusDays(STATS_WINDOW_DAYS - 1L);
+
+        Map<LocalDate, Long> byDay = new HashMap<>();
+        for (Object[] row : analyticsRepository.dailyClicksSince(linkId, sinceDay)) {
+            byDay.put((LocalDate) row[0], ((Number) row[1]).longValue());
+        }
+        byDay.put(today, analyticsRepository.countSince(linkId, today.atStartOfDay(ZoneOffset.UTC).toInstant()));
+
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (LocalDate day = sinceDay; !day.isAfter(today); day = day.plusDays(1)) {
+            result.add(Map.of("day", day.toString(), "clicks", byDay.getOrDefault(day, 0L)));
+        }
+        return result;
+    }
+
     // Batched equivalent of clicksLast7Days for a page of links, to avoid N+1 queries from listForOwner.
     public Map<UUID, Long> clicksLast7DaysForLinks(List<UUID> linkIds) {
         if (linkIds.isEmpty()) return Map.of();

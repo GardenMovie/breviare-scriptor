@@ -42,6 +42,14 @@ public interface AnalyticsRepository extends JpaRepository<AnalyticsEvent, Long>
             """, nativeQuery = true)
     long sumDailyClicksSince(@Param("linkId") UUID linkId, @Param("sinceDay") LocalDate sinceDay);
 
+    @Query(value = """
+            SELECT day, click_count
+            FROM link_daily_clicks
+            WHERE link_id = :linkId AND day >= :sinceDay
+            ORDER BY day
+            """, nativeQuery = true)
+    List<Object[]> dailyClicksSince(@Param("linkId") UUID linkId, @Param("sinceDay") LocalDate sinceDay);
+
     // Batched per-link sums for a page of links, avoiding N+1 queries.
     @Query(value = """
             SELECT link_id, COALESCE(SUM(click_count), 0)
