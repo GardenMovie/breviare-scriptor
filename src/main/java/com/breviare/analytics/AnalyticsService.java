@@ -71,7 +71,8 @@ public class AnalyticsService {
 
         Map<LocalDate, Long> byDay = new HashMap<>();
         for (Object[] row : analyticsRepository.dailyClicksSince(linkId, sinceDay)) {
-            byDay.put((LocalDate) row[0], ((Number) row[1]).longValue());
+            LocalDate day = row[0] instanceof LocalDate ld ? ld : ((java.sql.Date) row[0]).toLocalDate();
+            byDay.put(day, ((Number) row[1]).longValue());
         }
         byDay.put(today, analyticsRepository.countSince(linkId, today.atStartOfDay(ZoneOffset.UTC).toInstant()));
 
