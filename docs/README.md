@@ -3,7 +3,7 @@
 A URL shortener backend. Create short links anonymously, or sign in with Google to track click
 analytics, manage your links, and claim a permanent vanity link at `breviare.sh/<username>`.
 
-This repo is the **backend only** (Spring Boot / Java) — there is no frontend here.
+This repo is the **backend** for Breviare (Spring Boot / Java), you can find the frontend [here](https://github.com/GardenMovie/breviare-iter)
 
 ---
 
