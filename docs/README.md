@@ -37,7 +37,7 @@ This repo is the **backend** for Breviare (Spring Boot / Java), you can find the
 | Rate limiting | Bucket4j |
 
 Deployed via GitHub Actions to a single EC2 instance, running as a systemd service
-(`breviare.service`). No staging environment currently exists.
+(`breviare.service`).
 
 ---
 
@@ -75,9 +75,3 @@ docker run -d --name breviare-pg -e POSTGRES_USER=breviare -e POSTGRES_PASSWORD=
 do UTC-sensitive date arithmetic), and fails fast with a clear message if `.env` is missing.
 
 See `.env.example` for the full list of environment variables and what each one does.
-
----
-
-## License
-
-TBD
