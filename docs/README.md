@@ -1,7 +1,7 @@
 # Breviare
 
 A URL shortener backend. Create short links anonymously, or sign in with Google to track click
-analytics, manage your links, and claim a permanent vanity link at `breviare.sh/<username>`.
+analytics, manage your links, and claim a vanity link at `https://breviare-iter.vercel.app/u/<username>`.
 
 This repo is the **backend** for Breviare (Spring Boot / Java), you can find the frontend [here](https://github.com/GardenMovie/breviare-iter)
 
@@ -9,23 +9,21 @@ This repo is the **backend** for Breviare (Spring Boot / Java), you can find the
 
 ## Features
 
-- **Anonymous link creation** — shorten any URL without an account
-- **Base52 short codes** — 6-character all-letter codes (ambiguous characters like `0/O/1/l/I`
+- **Anonymous link creation**: shorten any URL without an account
+- **Base52 short codes**: 6-character all-letter codes (ambiguous characters like `0/O/1/l/I`
   excluded), displayed as `aBc-DeF` for readability
-- **Google OAuth sign-in** — no password auth; accounts are created via Google ID token verification
-- **Link expiry** — links expire after 30 days of inactivity or an optional absolute TTL; expiry is
-  currently soft-delete only (rows are flagged, not removed)
-- **Vanity links** — signed-in users claim a `username`, which doubles as their personal redirect
-  slug (`breviare.sh/<username>`)
-- **Analytics** — lifetime click count per link, plus a 7-day daily click breakdown
-  (`clicksLast7Days`) backed by a nightly rollup job. Per-link country/referrer breakdowns are
-  built on the repository layer but not yet exposed via any endpoint.
-- **302 redirects with `Cache-Control: no-store`** — every click hits the server so analytics
+- **Google OAuth sign-in**: no password auth; accounts are created via Google ID token verification
+- **Link expiry**: links expire after 30 days of inactivity or an optional absolute TTL;
+- **Vanity links**: signed-in users claim a `username`, which doubles as their personal redirect
+  slug (`https://breviare-iter.vercel.app/u/<username>`)
+- **Analytics**: lifetime click count per link, plus a 7-day daily click breakdown
+  (`clicksLast7Days`) backed by a nightly rollup job.
+- **302 redirects with `Cache-Control: no-store`**: every click hits the server so analytics
   aren't silently lost to browser caching
-- **Link safety checks on creation** — scheme allowlist (http/https only) → local blocklist
+- **Link safety checks on creation**: scheme allowlist (http/https only) → local blocklist
   (synced nightly from a public DNS blocklist) → optional Google Safe Browsing check (fails open
   if the API is unavailable)
-- **Rate limiting** — mutating endpoints are limited per-IP (Bucket4j)
+- **Rate limiting**: mutating endpoints are limited per-IP (Bucket4j)
 
 ---
 
