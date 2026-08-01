@@ -58,6 +58,9 @@ public class LinkValidationService {
         if (!ALLOWED_SCHEMES.contains(scheme)) {
             throw BreviareException.badRequest("Only http and https URLs are allowed");
         }
+        if (uri.getHost() == null || uri.getHost().isBlank()) {
+            throw BreviareException.badRequest("URL must include a host");
+        }
         return uri;
     }
 
