@@ -4,6 +4,7 @@ import com.breviare.analytics.AnalyticsService;
 import com.breviare.links.Link;
 import com.breviare.links.LinkService;
 import com.breviare.users.UserRepository;
+import com.breviare.users.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,14 @@ public class RedirectController {
 
     private final LinkService linkService;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final AnalyticsService analyticsService;
 
-    public RedirectController(LinkService linkService, UserRepository userRepository, AnalyticsService analyticsService) {
+    public RedirectController(LinkService linkService, UserRepository userRepository,
+                              UserService userService, AnalyticsService analyticsService) {
         this.linkService = linkService;
         this.userRepository = userRepository;
+        this.userService = userService;
         this.analyticsService = analyticsService;
     }
 
@@ -55,13 +59,18 @@ public class RedirectController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    // Vanity links never expire, so there is no expiry check here to mirror the short-code path.
     @GetMapping("/u/{username}")
-    public ResponseEntity<Void> resolveVanity(@PathVariable String username) {
+    public ResponseEntity<Void> resolveVanity(@PathVariable String username, HttpServletRequest request) {
         return userRepository.findByUsername(username)
                 .map(user -> {
                     if (user.getVanityDestination() == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).<Void>build();
                     }
+
+                    analyticsService.recordVanityClick(user, request);
+                    userService.recordVanityClick(user.getId());
+
                     return redirect(user.getVanityDestination());
                 })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
