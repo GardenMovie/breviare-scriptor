@@ -82,6 +82,11 @@ public class UserService {
     }
 
     @Transactional
+    public void recordVanityClick(UUID userId) {
+        userRepository.incrementVanityClickCount(userId);
+    }
+
+    @Transactional
     public void deleteAccount(UUID userId) {
         userRepository.deleteById(userId);
     }

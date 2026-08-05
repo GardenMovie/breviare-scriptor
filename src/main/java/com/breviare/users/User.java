@@ -36,6 +36,11 @@ public class User {
     // For the destination we only care about how many were changed this month, maybe change so it a record of the first change in the 30 day period
     private Instant vanityDestinationChangedAt;
 
+    // Lifetime total, bumped inline on each vanity redirect. Deliberately not derived from
+    // vanity_daily_clicks, which only retains the rollup window used for charting.
+    @Column(nullable = false)
+    private long vanityClickCount = 0;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -59,6 +64,8 @@ public class User {
     public void setVanityDestinationChangeCountThisMonth(int count) { this.vanityDestinationChangeCountThisMonth = count; }
     public Instant getVanityDestinationChangedAt() { return vanityDestinationChangedAt; }
     public void setVanityDestinationChangedAt(Instant t) { this.vanityDestinationChangedAt = t; }
+    public long getVanityClickCount() { return vanityClickCount; }
+    public void setVanityClickCount(long vanityClickCount) { this.vanityClickCount = vanityClickCount; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
