@@ -1,6 +1,8 @@
 package com.breviare.users;
 
 import com.breviare.common.BreviareException;
+import com.breviare.links.LinkValidationService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +17,11 @@ public class UserService {
     private static final int MAX_VANITY_CHANGES_PER_MONTH = 5;
 
     private final UserRepository userRepository;
+    private final LinkValidationService linkValidationService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, LinkValidationService linkValidationService) {
         this.userRepository = userRepository;
+        this.linkValidationService = linkValidationService;
     }
 
     public User getById(UUID id) {
@@ -38,7 +42,7 @@ public class UserService {
             throw BreviareException.conflict("Username already taken");
         }
         user.setUsername(username);
-        return userRepository.save(user);
+        return saveOrConflict(user);
     }
 
     @Transactional
@@ -64,18 +68,33 @@ public class UserService {
             if (user.getVanityDestinationChangeCountThisMonth() >= MAX_VANITY_CHANGES_PER_MONTH) {
                 throw BreviareException.rateLimited("Vanity destination can only be changed 5 times per month");
             }
-            user.setVanityDestination(request.vanityDestination().isEmpty() ? null : request.vanityDestination());
+            boolean clearing = request.vanityDestination().isEmpty();
+            if (!clearing) {
+                linkValidationService.validate(request.vanityDestination());
+            }
+            user.setVanityDestination(clearing ? null : request.vanityDestination());
             // Ideally we would only update this if its the first change in the month, so its 30 days from the first change
             user.setVanityDestinationChangedAt(Instant.now());
             user.setVanityDestinationChangeCountThisMonth(user.getVanityDestinationChangeCountThisMonth() + 1);
         }
 
-        return userRepository.save(user);
+        return saveOrConflict(user);
     }
 
     @Transactional
     public void deleteAccount(UUID userId) {
         userRepository.deleteById(userId);
+    }
+
+    // The existsByUsername pre-checks above leave a window where two concurrent claims both pass.
+    // The DB unique constraint is the real guard; flush here so it surfaces as a 409 rather than
+    // escaping as a DataIntegrityViolationException at commit time (which the handler maps to a 500).
+    private User saveOrConflict(User user) {
+        try {
+            return userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            throw BreviareException.conflict("Username already taken");
+        }
     }
 
     private boolean changedThisMonth(Instant changedAt) {

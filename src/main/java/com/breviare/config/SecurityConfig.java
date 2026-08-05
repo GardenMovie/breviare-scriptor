@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/links").permitAll()
                         .requestMatchers(HttpMethod.GET, "/{slug}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/u/{username}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
