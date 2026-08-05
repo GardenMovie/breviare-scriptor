@@ -1,6 +1,7 @@
 package com.breviare.analytics;
 
 import com.breviare.links.Link;
+import com.breviare.users.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,6 +19,7 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 public class AnalyticsService {
@@ -29,9 +31,12 @@ public class AnalyticsService {
     private static final int STATS_WINDOW_DAYS = 7;
 
     private final AnalyticsRepository analyticsRepository;
+    private final VanityAnalyticsRepository vanityAnalyticsRepository;
 
-    public AnalyticsService(AnalyticsRepository analyticsRepository) {
+    public AnalyticsService(AnalyticsRepository analyticsRepository,
+                            VanityAnalyticsRepository vanityAnalyticsRepository) {
         this.analyticsRepository = analyticsRepository;
+        this.vanityAnalyticsRepository = vanityAnalyticsRepository;
     }
 
     @Async
@@ -46,11 +51,26 @@ public class AnalyticsService {
         analyticsRepository.save(new AnalyticsEvent(link, referrer, userAgent, ipHash, null));
     }
 
+    @Async
+    @Transactional
+    public void recordVanityClick(User user, HttpServletRequest request) {
+        String ip = resolveClientIp(request);
+        String ipHash = ip != null ? sha256(ip) : null;
+        String referrer = request.getHeader("Referer");
+        String userAgent = request.getHeader("User-Agent");
+
+        // TODO: resolve countryCode from ip via GeoIP lookup instead of passing null
+        vanityAnalyticsRepository.save(new VanityEvent(user, referrer, userAgent, ipHash, null));
+    }
+
+    // One job for both pipelines: same window, same transaction, so link and vanity rollups can
+    // never disagree about which days have been recomputed.
     @Scheduled(cron = "0 30 2 * * *") // nightly, before the 3am blocklist sync
     @Transactional
     public void rollupDailyClicks() {
         Instant since = LocalDate.now(ZoneOffset.UTC).minusDays(ROLLUP_WINDOW_DAYS).atStartOfDay(ZoneOffset.UTC).toInstant();
         analyticsRepository.rollupDailyClicksSince(since);
+        vanityAnalyticsRepository.rollupDailyClicksSince(since);
     }
 
     // Last 7 days of clicks for a single link: days 1-6 from the rollup table, plus a live
@@ -66,21 +86,53 @@ public class AnalyticsService {
     // chronological order. Zero-fills days with no rows/clicks so the caller always gets exactly
     // 7 entries.
     public List<Map<String, Object>> dailyClicksLast7Days(UUID linkId) {
+        return dailyClicksLast7Days(
+                () -> analyticsRepository.dailyClicksSince(linkId, statsWindowStart()),
+                since -> analyticsRepository.countSince(linkId, since));
+    }
+
+    // Vanity equivalent, returning the identical {day, clicks} shape so the same chart renders both.
+    public List<Map<String, Object>> vanityDailyClicksLast7Days(UUID userId) {
+        return dailyClicksLast7Days(
+                () -> vanityAnalyticsRepository.dailyClicksSince(userId, statsWindowStart()),
+                since -> vanityAnalyticsRepository.countSince(userId, since));
+    }
+
+    public long vanityClicksLast7Days(UUID userId) {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        LocalDate sinceDay = today.minusDays(STATS_WINDOW_DAYS - 1L);
+        long rolledUp = vanityAnalyticsRepository.sumDailyClicksSince(userId, statsWindowStart());
+        long liveToday = vanityAnalyticsRepository.countSince(userId, today.atStartOfDay(ZoneOffset.UTC).toInstant());
+        return rolledUp + liveToday;
+    }
+
+    // Shared shape for both pipelines: rolled-up rows for days 1-6, a live count for today (which
+    // the nightly job hasn't rolled up yet), zero-filled to exactly STATS_WINDOW_DAYS entries.
+    private List<Map<String, Object>> dailyClicksLast7Days(Supplier<List<Object[]>> rolledUpRows,
+                                                           LongFunction liveTodayCount) {
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate sinceDay = statsWindowStart();
 
         Map<LocalDate, Long> byDay = new HashMap<>();
-        for (Object[] row : analyticsRepository.dailyClicksSince(linkId, sinceDay)) {
+        for (Object[] row : rolledUpRows.get()) {
             LocalDate day = row[0] instanceof LocalDate ld ? ld : ((java.sql.Date) row[0]).toLocalDate();
             byDay.put(day, ((Number) row[1]).longValue());
         }
-        byDay.put(today, analyticsRepository.countSince(linkId, today.atStartOfDay(ZoneOffset.UTC).toInstant()));
+        byDay.put(today, liveTodayCount.apply(today.atStartOfDay(ZoneOffset.UTC).toInstant()));
 
         List<Map<String, Object>> result = new java.util.ArrayList<>();
         for (LocalDate day = sinceDay; !day.isAfter(today); day = day.plusDays(1)) {
             result.add(Map.of("day", day.toString(), "clicks", byDay.getOrDefault(day, 0L)));
         }
         return result;
+    }
+
+    private LocalDate statsWindowStart() {
+        return LocalDate.now(ZoneOffset.UTC).minusDays(STATS_WINDOW_DAYS - 1L);
+    }
+
+    @FunctionalInterface
+    private interface LongFunction {
+        long apply(Instant since);
     }
 
     // Batched equivalent of clicksLast7Days for a page of links, to avoid N+1 queries from listForOwner.
