@@ -1,14 +1,18 @@
 package com.breviare.links;
 
 import com.breviare.analytics.AnalyticsService;
+import com.breviare.cache.LinkCache;
 import com.breviare.common.BreviareException;
 import com.breviare.users.User;
 import com.breviare.users.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -32,6 +36,10 @@ public class LinkService {
 
     @Value("${breviare.base-url}")
     private String baseUrl;
+
+    // Present only when breviare.cache.enabled=true. Setter-style injection keeps the constructor stable.
+    @Autowired(required = false)
+    private LinkCache linkCache;
 
     public LinkService(LinkRepository linkRepository, UserRepository userRepository,
                         LinkValidationService linkValidationService, AnalyticsService analyticsService) {
@@ -60,7 +68,9 @@ public class LinkService {
             }
         }
 
-        return linkRepository.save(link);
+        Link saved = linkRepository.save(link);
+        evictAfterCommit(link.getCode()); // clears a cached "unknown slug" entry for this code
+        return saved;
     }
 
     public Link getByCode(String code, UUID requesterId) {
@@ -84,13 +94,32 @@ public class LinkService {
         if (request.destination() != null) link.setDestination(request.destination());
         if (request.inactivityTtlDays() != null) link.setInactivityTtlDays(request.inactivityTtlDays());
         if (request.absoluteExpiresAt() != null) link.setAbsoluteExpiresAt(request.absoluteExpiresAt());
-        return linkRepository.save(link);
+        Link saved = linkRepository.save(link);
+        evictAfterCommit(code);
+        return saved;
     }
 
     @Transactional
     public void delete(String code, UUID requesterId) {
         Link link = getByCode(code, requesterId);
         linkRepository.delete(link);
+        evictAfterCommit(code);
+    }
+
+    // Evict after the transaction commits, so a concurrent redirect cannot re-cache the pre-commit
+    // value between the eviction and the commit.
+    private void evictAfterCommit(String code) {
+        if (linkCache == null) return;
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    linkCache.evict(code);
+                }
+            });
+        } else {
+            linkCache.evict(code);
+        }
     }
 
     public List<LinkResponse> listForOwner(UUID ownerId, int limit, boolean includeExpired, String cursor) {
@@ -106,6 +135,12 @@ public class LinkService {
         link.setLastClickedAt(Instant.now());
         link.setClickCount(link.getClickCount() + 1);
         linkRepository.save(link);
+    }
+
+    // Cached redirect path: no Link entity is loaded, so bump the counters with a single UPDATE.
+    @Transactional
+    public void recordClick(UUID linkId) {
+        linkRepository.incrementClick(linkId, Instant.now());
     }
 
     @Scheduled(cron = "0 0 * * * *") // hourly

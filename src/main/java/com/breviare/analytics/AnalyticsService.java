@@ -1,7 +1,10 @@
 package com.breviare.analytics;
 
+import com.breviare.clicks.ClickEvent;
 import com.breviare.links.Link;
 import com.breviare.users.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,6 +36,9 @@ public class AnalyticsService {
     private final AnalyticsRepository analyticsRepository;
     private final VanityAnalyticsRepository vanityAnalyticsRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public AnalyticsService(AnalyticsRepository analyticsRepository,
                             VanityAnalyticsRepository vanityAnalyticsRepository) {
         this.analyticsRepository = analyticsRepository;
@@ -49,6 +55,28 @@ public class AnalyticsService {
 
         // TODO: resolve countryCode from ip via GeoIP lookup instead of passing null
         analyticsRepository.save(new AnalyticsEvent(link, referrer, userAgent, ipHash, null));
+    }
+
+    // Snapshot of a click for the Redis queue. Must run on the request thread: it reads the request
+    // headers, and stamps the time the click actually happened.
+    public ClickEvent clickEvent(ClickEvent.Type type, UUID targetId, HttpServletRequest request) {
+        String ip = resolveClientIp(request);
+        return new ClickEvent(type, targetId, Instant.now(),
+                request.getHeader("Referer"), request.getHeader("User-Agent"),
+                ip != null ? sha256(ip) : null);
+    }
+
+    // Same as recordClick(Link, ...) for the cached redirect path, where only the link id is known.
+    @Async
+    @Transactional
+    public void recordClick(UUID linkId, HttpServletRequest request) {
+        String ip = resolveClientIp(request);
+        String ipHash = ip != null ? sha256(ip) : null;
+        String referrer = request.getHeader("Referer");
+        String userAgent = request.getHeader("User-Agent");
+
+        analyticsRepository.save(new AnalyticsEvent(entityManager.getReference(Link.class, linkId),
+                referrer, userAgent, ipHash, null));
     }
 
     @Async

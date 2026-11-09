@@ -24,6 +24,12 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 200ms   # fail fast: a slow Redis must never make redirects slower than Postgres
+
   jackson:
     default-property-inclusion: non_null
     serialization:
@@ -33,6 +39,22 @@ server:
   port: ${PORT:8080}
 
 breviare:
+  cache:
+    # Redis read cache for GET /{slug}. Off by default; when off, the redirect path is unchanged.
+    enabled: ${BREVIARE_CACHE_ENABLED:false}
+    ttl-seconds: ${BREVIARE_CACHE_TTL_SECONDS:600}
+    negative-ttl-seconds: ${BREVIARE_CACHE_NEGATIVE_TTL_SECONDS:30}
+  clicks:
+    # Redis Streams queue for click events: redirects XADD, a background flusher batch-writes to Postgres.
+    # Off by default; when off (or when Redis is unavailable) clicks are written to Postgres directly.
+    queue:
+      enabled: ${BREVIARE_CLICKS_QUEUE_ENABLED:false}
+      stream: ${BREVIARE_CLICKS_STREAM:clicks}
+      group: breviare
+      consumer: ${HOSTNAME:main}   # one app instance assumed; see ClickFlusher
+      max-length: 100000           # approximate XADD MAXLEN, bounds Redis memory if the consumer stalls
+      batch-size: 500
+      flush-interval-ms: 250
   jwt:
     secret: ${JWT_SECRET}
     access-token-expiry-minutes: 15

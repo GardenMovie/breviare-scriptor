@@ -16,6 +16,11 @@ public interface LinkRepository extends JpaRepository<Link, UUID> {
     @Query("SELECT l FROM Link l WHERE l.owner.id = :ownerId AND (:includeExpired = true OR l.isExpired = false) ORDER BY l.createdAt DESC")
     List<Link> findByOwnerPaged(UUID ownerId, boolean includeExpired, Pageable pageable);
 
+    // Atomic click bump by id, for the cached redirect path where no Link entity is loaded.
+    @Modifying
+    @Query("UPDATE Link l SET l.clickCount = l.clickCount + 1, l.lastClickedAt = :now WHERE l.id = :id")
+    int incrementClick(UUID id, Instant now);
+
     @Modifying
     @Query("UPDATE Link l SET l.isExpired = true, l.expiredAt = :now WHERE l.isExpired = false AND l.absoluteExpiresAt < :now")
     int expireByAbsoluteTtl(Instant now);
