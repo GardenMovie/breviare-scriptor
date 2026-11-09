@@ -45,16 +45,15 @@ public class AnalyticsService {
         this.vanityAnalyticsRepository = vanityAnalyticsRepository;
     }
 
+    // Direct (non-queue) write. Takes a snapshot built on the request thread: the servlet request must
+    // never be read from the @Async thread, because Tomcat recycles it once the response is sent and
+    // the click would be silently lost under load.
     @Async
     @Transactional
-    public void recordClick(Link link, HttpServletRequest request) {
-        String ip = resolveClientIp(request);
-        String ipHash = ip != null ? sha256(ip) : null;
-        String referrer = request.getHeader("Referer");
-        String userAgent = request.getHeader("User-Agent");
-
+    public void recordClick(ClickEvent event) {
         // TODO: resolve countryCode from ip via GeoIP lookup instead of passing null
-        analyticsRepository.save(new AnalyticsEvent(link, referrer, userAgent, ipHash, null));
+        analyticsRepository.save(new AnalyticsEvent(entityManager.getReference(Link.class, event.targetId()),
+                event.referrer(), event.userAgent(), event.ipHash(), null));
     }
 
     // Snapshot of a click for the Redis queue. Must run on the request thread: it reads the request
@@ -66,29 +65,12 @@ public class AnalyticsService {
                 ip != null ? sha256(ip) : null);
     }
 
-    // Same as recordClick(Link, ...) for the cached redirect path, where only the link id is known.
     @Async
     @Transactional
-    public void recordClick(UUID linkId, HttpServletRequest request) {
-        String ip = resolveClientIp(request);
-        String ipHash = ip != null ? sha256(ip) : null;
-        String referrer = request.getHeader("Referer");
-        String userAgent = request.getHeader("User-Agent");
-
-        analyticsRepository.save(new AnalyticsEvent(entityManager.getReference(Link.class, linkId),
-                referrer, userAgent, ipHash, null));
-    }
-
-    @Async
-    @Transactional
-    public void recordVanityClick(User user, HttpServletRequest request) {
-        String ip = resolveClientIp(request);
-        String ipHash = ip != null ? sha256(ip) : null;
-        String referrer = request.getHeader("Referer");
-        String userAgent = request.getHeader("User-Agent");
-
+    public void recordVanityClick(ClickEvent event) {
         // TODO: resolve countryCode from ip via GeoIP lookup instead of passing null
-        vanityAnalyticsRepository.save(new VanityEvent(user, referrer, userAgent, ipHash, null));
+        vanityAnalyticsRepository.save(new VanityEvent(entityManager.getReference(User.class, event.targetId()),
+                event.referrer(), event.userAgent(), event.ipHash(), null));
     }
 
     // One job for both pipelines: same window, same transaction, so link and vanity rollups can

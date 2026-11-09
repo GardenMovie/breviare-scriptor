@@ -38,6 +38,7 @@ public class ClickFlusher {
 
     private final StringRedisTemplate redis;
     private final ClickBatchWriter writer;
+    private final ClickQueue queue;
     private final String stream;
     private final String group;
     private final Consumer consumer;
@@ -46,13 +47,14 @@ public class ClickFlusher {
     private boolean groupReady = false;
     private boolean recoverPending = true; // on start, first finish whatever a previous run left pending
 
-    public ClickFlusher(StringRedisTemplate redis, ClickBatchWriter writer,
+    public ClickFlusher(StringRedisTemplate redis, ClickBatchWriter writer, ClickQueue queue,
                         @Value("${breviare.clicks.queue.stream}") String stream,
                         @Value("${breviare.clicks.queue.group}") String group,
                         @Value("${breviare.clicks.queue.consumer}") String consumer,
                         @Value("${breviare.clicks.queue.batch-size}") int batchSize) {
         this.redis = redis;
         this.writer = writer;
+        this.queue = queue;
         this.stream = stream;
         this.group = group;
         this.consumer = Consumer.from(group, consumer);
@@ -70,6 +72,7 @@ public class ClickFlusher {
             for (int i = 0; i < MAX_BATCHES_PER_TICK; i++) {
                 if (readAndWrite(ReadOffset.lastConsumed()) < batchSize) break;
             }
+            publishBacklog(); // after the last batch, so the flag clears as soon as the queue is empty
         } catch (Exception e) {
             // Redis or Postgres hiccup. Nothing was acknowledged, so nothing is lost; retry next tick,
             // re-reading our pending entries first.
@@ -81,7 +84,14 @@ public class ClickFlusher {
         }
     }
 
+    private void publishBacklog() {
+        Long length = redis.opsForStream().size(stream);
+        if (length != null) queue.updateBacklog(length);
+    }
+
     private int readAndWrite(ReadOffset offset) {
+        // Refresh per batch, not just per tick: a tick can drain many batches and the flag must not go stale.
+        publishBacklog();
         List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
                 consumer, StreamReadOptions.empty().count(batchSize), StreamOffset.create(stream, offset));
         if (records == null || records.isEmpty()) return 0;

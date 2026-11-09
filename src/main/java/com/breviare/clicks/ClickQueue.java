@@ -34,6 +34,11 @@ public class ClickQueue {
     private final StringRedisTemplate redis;
     private final byte[] streamKey;
     private final XAddOptions options;
+    // Backpressure: once the backlog reaches half the stream cap, stop queueing so Redis never has to
+    // trim (= silently drop) the oldest clicks. Callers then write directly to Postgres, slower but lossless.
+    // The other half of the cap is headroom for the clicks that arrive before the flag next refreshes.
+    private final long saturationLimit;
+    private volatile boolean saturated = false;
 
     public ClickQueue(StringRedisTemplate redis,
                       @Value("${breviare.clicks.queue.stream}") String stream,
@@ -42,9 +47,23 @@ public class ClickQueue {
         this.streamKey = stream.getBytes(UTF_8);
         // Approximate trimming is O(1) amortised and keeps the stream bounded even if the consumer is down.
         this.options = XAddOptions.maxlen(maxLength).approximateTrimming(true);
+        this.saturationLimit = maxLength / 2;
+    }
+
+    // Called by the flusher every tick with the current stream length. The flag is checked per redirect,
+    // so the request path pays no extra Redis round trip.
+    void updateBacklog(long length) {
+        // Hysteresis: release only once the backlog is well below the limit, so the flag doesn't flap.
+        boolean now = saturated ? length >= saturationLimit * 8 / 10 : length >= saturationLimit;
+        if (now != saturated) {
+            log.warn(now ? "Click queue backlog {} reached the limit, writing clicks directly to Postgres"
+                         : "Click queue backlog {} drained, queueing clicks again", length);
+            saturated = now;
+        }
     }
 
     public boolean offer(ClickEvent event) {
+        if (saturated) return false;
         try {
             Map<byte[], byte[]> fields = new LinkedHashMap<>();
             event.toFields().forEach((k, v) -> fields.put(k.getBytes(UTF_8), v.getBytes(UTF_8)));

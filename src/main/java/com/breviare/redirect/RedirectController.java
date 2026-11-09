@@ -68,10 +68,7 @@ public class RedirectController {
 
                 if (linkCache != null) linkCache.put(normalized, link);
 
-                if (!enqueueClick(ClickEvent.Type.LINK, link.getId(), request)) {
-                    analyticsService.recordClick(link, request);
-                    linkService.recordClick(link);
-                }
+                trackClick(ClickEvent.Type.LINK, link.getId(), request);
 
                 return redirect(link.getDestination());
             }
@@ -92,10 +89,7 @@ public class RedirectController {
             case HIT:
                 LinkCache.CachedLink cached = lookup.link();
                 if (cached.isLive(Instant.now())) {
-                    if (!enqueueClick(ClickEvent.Type.LINK, cached.id(), request)) {
-                        analyticsService.recordClick(cached.id(), request);
-                        linkService.recordClick(cached.id());
-                    }
+                    trackClick(ClickEvent.Type.LINK, cached.id(), request);
                     return redirect(cached.destination());
                 }
                 return null;
@@ -113,10 +107,7 @@ public class RedirectController {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).<Void>build();
                     }
 
-                    if (!enqueueClick(ClickEvent.Type.VANITY, user.getId(), request)) {
-                        analyticsService.recordVanityClick(user, request);
-                        userService.recordVanityClick(user.getId());
-                    }
+                    trackClick(ClickEvent.Type.VANITY, user.getId(), request);
 
                     return redirect(user.getVanityDestination());
                 })
@@ -128,10 +119,20 @@ public class RedirectController {
         return ResponseEntity.ok("{\"status\":\"ok\"}");
     }
 
-    // True if the click was queued in Redis; false means the caller must write it to Postgres itself
-    // (queue disabled, or Redis unavailable).
-    private boolean enqueueClick(ClickEvent.Type type, UUID targetId, HttpServletRequest request) {
-        return clickQueue != null && clickQueue.offer(analyticsService.clickEvent(type, targetId, request));
+    // Records one click: onto the Redis queue if it is enabled and accepting, otherwise straight to
+    // Postgres (queue disabled, Redis down, or the backlog is full). Either way the request data is
+    // captured here, on the request thread.
+    private void trackClick(ClickEvent.Type type, UUID targetId, HttpServletRequest request) {
+        ClickEvent event = analyticsService.clickEvent(type, targetId, request);
+        if (clickQueue != null && clickQueue.offer(event)) return;
+
+        if (type == ClickEvent.Type.LINK) {
+            analyticsService.recordClick(event);
+            linkService.recordClick(targetId);
+        } else {
+            analyticsService.recordVanityClick(event);
+            userService.recordVanityClick(targetId);
+        }
     }
 
     private boolean isExpiredNow(Link link) {
